@@ -1,0 +1,23 @@
+All codes are written to accommodate linux clusters. To run the R files,  the users need to creating a corresponding liux slurm. The slurms of simulation are provided.\par 
+
+
+To obtain the result of real data analysis, the user need to get UKB individual level data and repeat the data cleaning procedure. The UKB phenotype data comes as a text file, we first extract the  GWAS variables, including the 7 traits, the top 10 genotype PC, sex, age, and the compute the top 20 metabolomic PCs. The data are saved as text files respectively for 7 traits. Then we process the genotype data for 7 traits.\par
+
+
+
+The validation data need to be cleaned. For each trait, we extract the base position (BP) and chromosome  number (chr) of the significant SNPs from the raw data and save them in a text file. Take BMI for example, the R file "BMI_validation_small.R" process the UKB validation data, while "BMI_validation_large.R" process another GWAS result with a larger sample size. Only one validation data set is used for WHR. The validation data of HC on GIANT consortium need some special treatments. We use the GWAS result of HC without adjusting for BMI. However, BP is missed in this data file. We extract the corresponding BP information from the GWAS of HC adjusted for BMI. \par
+
+We perform the GWAS of 7 traits and the 20 metabolomic PCs (mPCs) using plink and the code in the folder "gwas". To compuete the polygenetic score for 20 mPCs, we need to first obtain their GWAS summary file, then process the summary file with the code in "reform_data_before_PRS_CS".  The program to utilize PRS-CS is written with python. It may take users some time to put the python files and reference panels in suitable locations. We separate the computation of PRS-CS into 3 jobs, namely "get_coefficient1.txt", "get_coefficient2.txt", and "get_coefficient3.txt", to save time. The program compute coefficients for some (not all) SNPs, respectively for 22 chromosomes. Hence, for each of the 20 mPCs, there will be 22 files of coefficients. Users need to combine the 22 files together for each mPC, and obtain 20 files of coefficients. Using these 20 files, users can run the code in "compute_polygenetic_risk_score.txt" to get the score for each mPC. Finally, we sbstract the scores from the standardized mPCs and use residuals as covariates in M2.\par
+
+
+We apply our MV-cML adjustment on the plink GWAS output files of M1. The code is available in the folder "apply MV-cML on gwas results of M1". Outputs are saved in a text file.\par
+
+In the folder "compare results and count significant loci", we provide the code count and compare the number of significant loci. The R files named with "second_turn" computes the result when up to 10 mPCs are used in M1 and M2, while those named with "first_turn" give the result when all 20 mPCs are used in M1 and M2. The files start with "M1" compute the number of significant loci before and after applying MV-cML adjustment on M1, while those start with "M2" compare the GWAS results of M2 with those of MV-cML-M1. Users also need validation data to run these files.\par
+
+
+For the simulation, we first save all parameters, such as genetic effects and minor allele frequancy (MAF) in an RData file, which are loaded during the simulation. both the code and RData files are available on github. Users can run the code directly and obtain the results as text files, then use the code "get result from simulation output.R" to compute type one error and power, and to make plots. For each combination of genetic correlation and dimension, the simulation output is splitted into 20 files, and each file contains 50 repetitions.\par
+
+
+
+
+
