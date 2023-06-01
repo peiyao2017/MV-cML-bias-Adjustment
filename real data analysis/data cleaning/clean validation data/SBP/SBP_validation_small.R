@@ -1,0 +1,22 @@
+library(R.utils)
+library(data.table)
+setwd("C:/Users/wangp/Downloads/SBP")
+data=gunzip("C:/Users/wangp/Downloads/SBP/raw UKB validation/4080_irnt.gwas.imputed_v3.both_sexes.tsv.bgz", "SBP.tsv")
+data=fread("SBP.tsv",sep="\t")
+data=data[data$pval<=5e-8,]
+vari=data$variant
+chr=numeric()
+BP=numeric()
+for(i in 1:length(vari)){
+  chr[i]=substr(vari[i],start=1,stop=unlist(gregexpr(':',vari[i] ))[1]-1)
+  BP[i]=substr(vari[i],start=unlist(gregexpr(':',vari[i] ))[1]+1,stop=unlist(gregexpr(':',vari[i] ))[2]-1)
+  print(i)
+}
+chr=chr[chr!="X"]
+BP=BP[1:length(chr)]
+BP=na.omit(BP)
+chr=na.omit(chr)
+BP=as.numeric(BP)
+chr=as.numeric(chr)
+SBP_validation_small=data.frame(BP=BP,chr=chr)
+write.table(SBP_validation_small,file="SBP_validation_small.txt",sep="\t",row.names = FALSE,col.names = TRUE,quote=FALSE)

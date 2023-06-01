@@ -1,0 +1,121 @@
+#!/bin/bash -l
+#SBATCH --time=10:00:00
+#SBATCH -p ram1t,amd2tb,amd512
+#SBATCH --mem=100G
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=wan01299@umn.edu
+#SBATCH -o /panfs/jay/groups/20/panwei/wan01299/collider_bias/prune.out
+#SBATCH -e /panfs/jay/groups/20/panwei/wan01299/collider_bias/error.$J
+module load plink
+ 
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI"
+
+
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/110K_QCed1 --indep-pairwise 50 5 0.001
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/110K_QCed1 --extract plink.prune.in --make-bed --out 110K_QCed0.001
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/WC"
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/110K_QCed1 --indep-pairwise 50 5 0.001
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/110K_QCed1 --extract plink.prune.in --make-bed --out 110K_QCed0.001
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/HTN"
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/HTN/110K_QCed1 --indep-pairwise 50 5 0.001
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/HTN/110K_QCed1 --extract plink.prune.in --make-bed --out 110K_QCed0.001
+
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/HC"
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/HC/110K_QCed1 --indep-pairwise 50 5 0.001
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/HC/110K_QCed1 --extract plink.prune.in --make-bed --out 110K_QCed0.001
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/SBP"
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP/110K_QCed1 --indep-pairwise 50 5 0.001
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP/110K_QCed1 --extract plink.prune.in --make-bed --out 110K_QCed0.001
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/DBP"
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/DBP/110K_QCed1 --indep-pairwise 50 5 0.001
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/DBP/110K_QCed1 --extract plink.prune.in --make-bed --out 110K_QCed0.001
+
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/WHR"
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/110K_QCed1 --indep-pairwise 50 5 0.001
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/110K_QCed1 --extract plink.prune.in --make-bed --out 110K_QCed0.001
+
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/Height"
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/Height/110K_QCed1 --indep-pairwise 50 5 0.001
+
+plink --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/Height/110K_QCed1 --extract plink.prune.in --make-bed --out 110K_QCed0.001
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module load plink/2.00-alpha-091019
+
+

@@ -1,0 +1,103 @@
+
+
+library(data.table)
+library(dplyr)
+setwd("/panfs/jay/groups/20/panwei/wan01299/collider_bias")
+#load metabolic data
+
+x=fread(file="/panfs/jay/groups/20/panwei/shared/UKBiobankIndiv/metabolites/ukb49780.tab")
+x %>% select(ends_with('.0.0'),f.eid) -> x
+no_phe_id = which(rowSums(is.na(x))==249)
+x = x[-no_phe_id,]
+IID=x$f.eid
+FID=IID
+x=cbind(FID,IID,x)
+x=select(x,-c("f.eid"))
+met=x
+met=as.data.frame(met)
+for(i in 3:ncol(met)) {
+  met[,i][is.na(met[,i])]=mean(met[,i], na.rm = TRUE)
+}
+
+
+# load BMI, sex and age
+
+select1=c("f.eid","f.22027.0.0","f.22019.0.0","f.22001.0.0","f.22021.0.0","f.21001.0.0","f.31.0.0","f.34.0.0","f.21000.0.0","f.50.0.0","f.4080.0.0","f.4079.0.0","f.48.0.0","f.49.0.0","f.20002.0.0")
+snppc=numeric()
+for(i in 1:10){
+  snppc[i]=paste("f.22009.0",i,sep=".")
+}
+select1=c(select1,snppc) 
+data=fread("/panfs/jay/groups/20/panwei/shared/UKBiobankIndiv/ukb49020.tab",select=select1)
+data%>%filter(is.na(f.22027.0.0)&is.na(f.22019.0.0)&f.22001.0.0==f.31.0.0&f.22021.0.0 %in% c(0,1)&f.21000.0.0 %in% c(1,1001,1002,1003)) %>%
+select(-f.22027.0.0,-f.22019.0.0,-f.22001.0.0,-f.22021.0.0,-f.21000.0.0) ->data_clean->y
+FID=y$f.eid
+IID=y$f.eid
+BMI=y$f.21001.0.0
+Height=y$f.50.0.0
+SBP=y$f.4080.0.0
+DBP=y$f.4079.0.0
+WC=y$f.48.0.0
+HC=y$f.49.0.0
+WHR=WC/HC
+HTN=y$f.20002.0.0
+sex=y$f.31.0.0
+age=y$f.34.0.0
+genPC=cbind(y$f.22009.0.1,y$f.22009.0.2,y$f.22009.0.3,y$f.22009.0.4,y$f.22009.0.5,y$f.22009.0.6,y$f.22009.0.7,y$f.22009.0.8,y$f.22009.0.9,y$f.22009.0.10)
+y=cbind(data.frame(FID,IID,BMI,Height,SBP,DBP,WC,HC,WHR,HTN,sex,age),genPC)
+colnames(y)=c("FID","IID","BMI","Height","SBP","DBP","WC","HC","WHR","HTN","sex","age","genPC1","genPC2","genPC3","genPC4","genPC5","genPC6","genPC7","genPC8","genPC9","genPC10")
+
+allcovnames=c("BMI_all_cov.txt","Height_all_cov.txt","SBP_all_cov.txt","DBP_all_cov.txt","WC_all_cov.txt","HC_all_cov.txt","WHR_all_cov.txt","HTN_all_cov.txt")
+response_names=c("BMI.txt","Height.txt","SBP.txt","DBP.txt","WC.txt","HC.txt","WHR.txt","HTN.txt")
+id_names=c("BMI.id","Height.id","SBP.id","DBP.id","WC.id","HC.id","WHR.id","HTN.id")
+ch=read.table("/panfs/jay/groups/20/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr22_v2.fam",header=FALSE)
+id3=ch$V1
+covnames=c("BMI","Height","SBP","DBP","WC","HC","WHR","HTN")
+for( i in 1:1){
+if(i<8){
+datatemp=cbind(y[,1],y[,2],y[,i+2],y[,(11:ncol(y))])
+datatemp=na.omit(datatemp)
+colnames(datatemp)=c("FID","IID",covnames[i],"sex",  "age",    "genPC1",  "genPC2","genPC3",    "genPC4", "genPC5",    "genPC6",    "genPC7",    "genPC8",   "genPC9",   "genPC10")
+id1=met$FID
+id2=datatemp$FID
+id=intersect(id1,id2)
+id=intersect(id,id3)
+id=data.frame(FID=id,IID=id)
+fwrite(id,file=id_names[i],sep = "\t",col.names  = FALSE)
+met1=merge(id,met,by.x=c("FID","IID"),by.y=c("FID","IID"))
+datatemp=merge(id,datatemp,by.x=c("FID","IID"),by.y=c("FID","IID"))
+datatemp[,3] = qnorm((rank(datatemp[,3],na.last="keep")-0.5)/sum(!is.na(datatemp[,3]))) # inverse norm transformtaion
+datatemp[,4]=datatemp[,4]+1
+met.X=met1[,-c(1,2)]
+colnames(met.X)=NULL
+met.pca = prcomp(met.X,scale=TRUE)
+met.20PC = met.pca$x[,1:20]
+all_cov=cbind(datatemp[,(1:2)],datatemp[,(4:ncol(datatemp))],met.20PC)
+response=datatemp[,(1:3)]
+fwrite(all_cov,file=allcovnames[i],sep = "\t",col.names  = TRUE)
+fwrite(response,file=response_names[i],sep = "\t",col.names  = TRUE)
+}
+if(i==8){
+datatemp=cbind(y[,1],y[,2],y[,i+2],y[,(11:ncol(y))])
+datatemp=na.omit(datatemp)
+colnames(datatemp)=c("FID","IID",covnames[i],"sex",  "age",    "genPC1",  "genPC2",    "genPC3",    "genPC4", "genPC5",    "genPC6",    "genPC7",    "genPC8",   "genPC9",   "genPC10")
+id1=met$FID
+id2=datatemp$FID
+id=intersect(id1,id2)
+id=intersect(id,id3)
+id=data.frame(FID=id,IID=id)
+fwrite(id,file=id_names[i],sep = "\t",col.names  = FALSE)
+met1=merge(id,met,by.x=c("FID","IID"),by.y=c("FID","IID"))
+datatemp=merge(id,datatemp,by.x=c("FID","IID"),by.y=c("FID","IID"))
+datatemp[,3] = as.numeric(datatemp[,3]==1065)
+datatemp[,4]=datatemp[,4]+1
+met.X=met1[,-c(1,2)]
+colnames(met.X)=NULL
+met.pca = prcomp(met.X,scale=TRUE)
+met.20PC = met.pca$x[,1:20]
+all_cov=cbind(datatemp[,(1:2)],datatemp[,(4:ncol(datatemp))],met.20PC)
+response=datatemp[,(1:3)]
+fwrite(all_cov,file=allcovnames[i],sep = "\t",col.names  = TRUE)
+fwrite(response,file=response_names[i],sep = "\t",col.names  = TRUE)
+}
+}

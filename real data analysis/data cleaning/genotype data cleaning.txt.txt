@@ -1,0 +1,157 @@
+#!/bin/bash -l
+#SBATCH --time=10:00:00
+#SBATCH -p ram1t,amd2tb,amd512
+#SBATCH --mem=100G
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=wan01299@umn.edu
+#SBATCH -o /panfs/jay/groups/20/panwei/wan01299/collider_bias/slurm-%j.out
+#SBATCH -e /panfs/jay/groups/20/panwei/wan01299/collider_bias/error.$J
+ 
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI"
+
+module load plink
+for i in {1..22}
+do
+plink --bfile /home/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr${i}_v2 --keep BMI.id --geno 0.05 --maf 0.01 --hwe 1e-6 --make-bed --out chr${i} 
+done
+
+
+plink --bfile chr1 --merge-list  /home/panwei/wan01299/collider_bias/BMI/mergelist.txt --make-bed --out 110K_QCed1
+
+ 
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/WC"
+
+for i in {1..22}
+do
+plink --bfile /home/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr${i}_v2 --keep WC.id --geno 0.05 --maf 0.01 --hwe 1e-6 --make-bed --out chr${i} 
+done
+
+
+plink --bfile chr1 --merge-list  mergelist.txt --make-bed --out 110K_QCed1
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/HTN"
+
+for i in {1..22}
+do
+plink --bfile /home/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr${i}_v2 --keep HTN.id --geno 0.05 --maf 0.01 --hwe 1e-6 --make-bed --out chr${i} 
+done
+
+
+plink --bfile chr1 --merge-list  mergelist.txt --make-bed --out 110K_QCed1
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/HC"
+
+for i in {1..22}
+do
+plink --bfile /home/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr${i}_v2 --keep HC.id --geno 0.05 --maf 0.01 --hwe 1e-6 --make-bed --out chr${i} 
+done
+
+
+plink --bfile chr1 --merge-list  mergelist.txt --make-bed --out 110K_QCed1
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/SBP"
+
+for i in {1..22}
+do
+plink --bfile /home/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr${i}_v2 --keep SBP.id --geno 0.05 --maf 0.01 --hwe 1e-6 --make-bed --out chr${i} 
+done
+
+
+plink --bfile chr1 --merge-list  mergelist.txt --make-bed --out 110K_QCed1
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/DBP"
+
+for i in {1..22}
+do
+plink --bfile /home/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr${i}_v2 --keep DBP.id --geno 0.05 --maf 0.01 --hwe 1e-6 --make-bed --out chr${i} 
+done
+
+
+plink --bfile chr1 --merge-list  mergelist.txt --make-bed --out 110K_QCed1
+
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/WHR"
+
+for i in {1..22}
+do
+plink --bfile /home/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr${i}_v2 --keep WHR.id --geno 0.05 --maf 0.01 --hwe 1e-6 --make-bed --out chr${i} 
+done
+
+
+plink --bfile chr1 --merge-list  mergelist.txt --make-bed --out 110K_QCed1
+
+
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/Height"
+
+for i in {1..22}
+do
+plink --bfile /home/panwei/shared/UKBiobankIndiv/genetic_data/ukb_cal_chr${i}_v2 --keep Height.id --geno 0.05 --maf 0.01 --hwe 1e-6 --make-bed --out chr${i} 
+done
+
+
+plink --bfile chr1 --merge-list  mergelist.txt --make-bed --out 110K_QCed1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module load plink/2.00-alpha-091019
+
+
