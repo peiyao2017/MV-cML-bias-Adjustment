@@ -1,0 +1,70 @@
+#!/bin/bash -l
+#SBATCH --time=48:00:00
+#SBATCH -p msismall 
+#SBATCH --mem=30G
+#SBATCH --tmp=30g
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=wan01299@umn.edu
+#SBATCH -o /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP_gwas_M2.out
+
+
+
+
+#module load plink
+module load plink/2.00-alpha-091019
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP/coefficient/"
+
+
+
+for i in {2..20}
+do
+
+
+
+plink2 --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP/110K_QCed1 --pheno SBP.txt --covar SBP_all_cov_NoGene.txt --covar-name sex, age, genPC1-genPC10, PC1-PC${i} --variance-standardize --glm  --out responseM2_simNoGene
+
+
+done
+
+
+plink2 --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP/110K_QCed1 --pheno SBP.txt --covar SBP_all_cov_NoGene.txt --covar-name sex, age, genPC1-genPC10, PC1    --variance-standardize --glm  --out responseM2_simNoGene
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

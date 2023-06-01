@@ -1,0 +1,70 @@
+#!/bin/bash
+#SBATCH --time=32:00:00
+#SBATCH -p msismall
+#SBATCH --mem=100G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=wan01299@umn.edu
+#SBATCH -o /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/score.out
+
+
+module load plink
+
+
+cd     "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/coefficient/"
+
+for i in {1..20}
+do
+       plink --bfile  /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/110K_QCed1 --score met${i}_score.txt  2 4 6 header sum --out MET${i}_score
+done
+
+
+cd     "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/coefficient/"
+
+for i in {1..20}
+do
+       plink --bfile  /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/110K_QCed1 --score met${i}_score.txt  2 4 6 header sum --out MET${i}_score
+done
+
+cd     "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/HC/coefficient/"
+
+for i in {1..20}
+do
+       plink --bfile  /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/HC/110K_QCed1 --score met${i}_score.txt  2 4 6 header sum --out MET${i}_score
+done
+
+cd     "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/coefficient/"
+
+for i in {1..20}
+do
+       plink --bfile  /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/110K_QCed1 --score met${i}_score.txt  2 4 6 header sum --out MET${i}_score
+done
+
+
+
+cd     "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/Height/coefficient/"
+
+for i in {1..20}
+do
+       plink --bfile  /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/Height/110K_QCed1 --score met${i}_score.txt  2 4 6 header sum --out MET${i}_score
+done
+
+
+
+
+cd     "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP/coefficient/"
+
+for i in {1..20}
+do
+       plink --bfile  /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP/110K_QCed1 --score met${i}_score.txt  2 4 6 header sum --out MET${i}_score
+done
+
+
+
+
+cd     "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/DBP/coefficient/"
+
+for i in {1..20}
+do
+       plink --bfile  /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/DBP/110K_QCed1 --score met${i}_score.txt  2 4 6 header sum --out MET${i}_score
+done
+
