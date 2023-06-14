@@ -33,7 +33,8 @@ all_snps=list()
 
 for(i in 1:1000){
   all_snps[[i]]=data.frame(rs=rep(0,times=1000),beta_before=rep(0,times=1000),sd_before=rep(0,times=1000),p_before=rep(0,times=1000),beta_after=rep(0,times=1000),sd_after=rep(0,times=1000),p_after=rep(0,times=1000),beta_egger=rep(0,times=1000),sd_egger=rep(0,times=1000),p_egger=rep(0,times=1000),beta_true=rep(0,times=1000),bias=rep(0,times=1000),bias_true=rep(0,times=1000))
-}
+  all_snps[[i]]=cbind(all_snps[[i]],matrix(0,ncol=3*d,nrow=nrow(all_snps[[i]])))
+  }
 for(i in 1:1000){
   for(j in  1:1000){
     all_snps[[i]][j,]=a[i+(j-1)*1000,]
@@ -500,7 +501,8 @@ for(d in c(1,2,4,6,8)){
       
       for(i in 1:1000){
         all_snps[[i]]=data.frame(rs=rep(0,times=1000),beta_before=rep(0,times=1000),sd_before=rep(0,times=1000),p_before=rep(0,times=1000),beta_after=rep(0,times=1000),sd_after=rep(0,times=1000),p_after=rep(0,times=1000),beta_egger=rep(0,times=1000),sd_egger=rep(0,times=1000),p_egger=rep(0,times=1000),beta_true=rep(0,times=1000),bias=rep(0,times=1000),bias_true=rep(0,times=1000))
-      }
+        all_snps[[i]]=cbind(all_snps[[i]],matrix(0,ncol=3*d,nrow=nrow(all_snps[[i]])))
+        }
       for(i in 1:1000){
         for(j in  1:1000){
           all_snps[[i]][j,]=a[i+(j-1)*1000,]
