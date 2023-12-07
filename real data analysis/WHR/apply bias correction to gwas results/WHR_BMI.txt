@@ -1,0 +1,15 @@
+#!/bin/bash -l        
+#SBATCH --time=2:00:00
+#SBATCH --ntasks=100
+#SBATCH --mem=200g
+#SBATCH --tmp=200g
+#SBATCH --mail-type=ALL  
+#SBATCH --mail-user=wan01299@umn.edu 
+#SBATCH -o "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/WHR_BMI.out"
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/"
+module load R/4.2.2-openblas
+Rscript --save "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/WHR_BMI.R"
+
