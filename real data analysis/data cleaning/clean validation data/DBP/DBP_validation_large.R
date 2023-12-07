@@ -1,8 +1,0 @@
-setwd("C:/Users/wangp/Downloads/DBP")
-library(data.table)
-data=fread("gwas-association-downloaded_2023-03-10-pubmedId_30224653.tsv",sep="\t",header = TRUE)
-data=data.frame(chr=data$CHR_ID,trait=data$`DISEASE/TRAIT`,p=data$`P-VALUE`,BP=data$CHR_POS)
-data=subset(data,trait=="Diastolic blood pressure")
-data=na.omit(data)
-DBP_validation_large=data.frame(BP=data$BP,chr=data$chr)
-write.table(DBP_validation_large,file="DBP_validation_large.txt",sep="\t",row.names = FALSE,col.names = TRUE,quote=FALSE)
