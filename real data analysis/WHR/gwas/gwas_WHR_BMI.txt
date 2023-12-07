@@ -1,0 +1,22 @@
+#!/bin/bash -l
+#SBATCH --time=6:00:00
+#SBATCH -p msismall  
+#SBATCH --mem=100G
+#SBATCH --tmp=100g
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=wan01299@umn.edu
+#SBATCH -o /panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/WHR_gwas.out
+
+
+
+
+#module load plink
+module load plink/2.00-alpha-091019
+
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/"
+
+plink2 --bfile /panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/110K_QCed1 --pheno WHR.txt --covar CovWHR_BMI.txt  --variance-standardize --glm hide-covar --out WHR_BMI
+
