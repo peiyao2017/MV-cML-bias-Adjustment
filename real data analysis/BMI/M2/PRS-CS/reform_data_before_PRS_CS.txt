@@ -1,0 +1,87 @@
+#!/bin/bash -l
+#SBATCH --time=48:00:00
+#SBATCH -p msismall
+#SBATCH --mem=100G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=wan01299@umn.edu
+#SBATCH -o /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/reform_data.out
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/"
+
+
+for i in {1..20}
+do
+awk '{print $3,$6,$4,$9,$12}' MET.PC${i}.glm.linear  > MET.PC${i}.cs.sumstat
+sed -i 's/REF/A2/'  MET.PC${i}.cs.sumstat
+sed -i 's/ID/SNP/'  MET.PC${i}.cs.sumstat
+done
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/"
+
+
+for i in {1..20}
+do
+awk '{print $3,$6,$4,$9,$12}' MET.PC${i}.glm.linear  > MET.PC${i}.cs.sumstat
+sed -i 's/REF/A2/'  MET.PC${i}.cs.sumstat
+sed -i 's/ID/SNP/'  MET.PC${i}.cs.sumstat
+done
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/"
+
+
+for i in {1..20}
+do
+awk '{print $3,$6,$4,$9,$12}' MET.PC${i}.glm.linear  > MET.PC${i}.cs.sumstat
+sed -i 's/REF/A2/'  MET.PC${i}.cs.sumstat
+sed -i 's/ID/SNP/'  MET.PC${i}.cs.sumstat
+done
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/HC/"
+
+
+for i in {1..20}
+do
+awk '{print $3,$6,$4,$9,$12}' MET.PC${i}.glm.linear  > MET.PC${i}.cs.sumstat
+sed -i 's/REF/A2/'  MET.PC${i}.cs.sumstat
+sed -i 's/ID/SNP/'  MET.PC${i}.cs.sumstat
+done
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/Height/"
+
+
+for i in {1..20}
+do
+awk '{print $3,$6,$4,$9,$12}' MET.PC${i}.glm.linear  > MET.PC${i}.cs.sumstat
+sed -i 's/REF/A2/'  MET.PC${i}.cs.sumstat
+sed -i 's/ID/SNP/'  MET.PC${i}.cs.sumstat
+done
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/SBP/"
+
+
+for i in {1..20}
+do
+awk '{print $3,$6,$4,$9,$12}' MET.PC${i}.glm.linear  > MET.PC${i}.cs.sumstat
+sed -i 's/REF/A2/'  MET.PC${i}.cs.sumstat
+sed -i 's/ID/SNP/'  MET.PC${i}.cs.sumstat
+done
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/DBP/"
+
+
+for i in {1..20}
+do
+awk '{print $3,$6,$4,$9,$12}' MET.PC${i}.glm.linear  > MET.PC${i}.cs.sumstat
+sed -i 's/REF/A2/'  MET.PC${i}.cs.sumstat
+sed -i 's/ID/SNP/'  MET.PC${i}.cs.sumstat
+done
+
+
+

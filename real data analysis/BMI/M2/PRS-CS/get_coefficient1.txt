@@ -1,0 +1,53 @@
+#!/bin/bash -l
+#SBATCH --time=48:00:00
+#SBATCH -p msismall
+#SBATCH --mem=100G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=wan01299@umn.edu
+#SBATCH -o /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/coefficient.out
+
+module load python3
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/"
+
+
+for i in {1..20}
+do
+python /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/PRS.cs.py \
+    --ref_dir=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/ldblk_ukbb_eur \
+    --bim_prefix=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/110K_QCed1 \
+    --sst_file=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/MET.PC${i}.cs.sumstat \
+    --n_gwas=109996 \
+    --out_dir=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/BMI/coefficient/MET${i}.coe.txt
+done
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/"
+
+
+for i in {1..20}
+do
+python /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/PRS.cs.py \
+    --ref_dir=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/ldblk_ukbb_eur \
+    --bim_prefix=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/110K_QCed1 \
+    --sst_file=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/MET.PC${i}.cs.sumstat \
+    --n_gwas=109996 \
+    --out_dir=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WHR/coefficient/MET${i}.coe.txt
+done
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/"
+
+
+for i in {1..20}
+do
+python /panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/PRS.cs.py \
+    --ref_dir=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/ldblk_ukbb_eur \
+    --bim_prefix=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/110K_QCed1 \
+    --sst_file=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/MET.PC${i}.cs.sumstat \
+    --n_gwas=109996 \
+    --out_dir=/panfs/jay/groups/20/panwei/wan01299/collider_bias/M2/WC/coefficient/MET${i}.coe.txt
+done
+
+
+
