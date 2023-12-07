@@ -1,0 +1,17 @@
+#!/bin/bash -l        
+#SBATCH --time=4:00:00
+
+#SBATCH --ntasks=1
+#SBATCH --mem=100g
+#SBATCH --tmp=100g
+#SBATCH --mail-type=ALL  
+#SBATCH --mail-user=wan01299@umn.edu 
+#SBATCH -o "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/BMIMET/BMIMETPC/M2/first_turn/compare_results_BMI1.out"
+
+
+
+cd "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/BMIMET/BMIMETPC/M2/first_turn/"
+module load R/3.6.0
+Rscript --save "/panfs/jay/groups/20/panwei/wan01299/collider_bias/BMI/MV_Egger/new/new_gwas/BMIMET/BMIMETPC/M2/first_turn/compare_results_BMI1.R"
+
+
