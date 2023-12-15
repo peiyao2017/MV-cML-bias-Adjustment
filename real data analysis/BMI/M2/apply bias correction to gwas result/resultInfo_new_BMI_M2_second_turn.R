@@ -73,26 +73,39 @@ for(i in 1:ncol(betaGX1total)){
 
 corr_total=list()
 for(i in 1:Ncov){
-  corr_total[[i]]=diag(1, nrow=length(atotal)+1,ncol=length(atotal)+1)
+  corr_total[[i]]=diag(1, nrow=i+1,ncol=i+1)
 }
-Met=read.table(file="MET_20PC_NoGene.txt",header = TRUE,sep="\t")
+Met=read.table(file="MET_20PC.txt",header = TRUE,sep="\t")
 BMI=read.table(file="BMI.txt",header = TRUE,sep="\t")
- 
+
 for(i in 1:length(btotal)){
-  for(j in 1:(nrow(corr_total[[1]]) )){
-    for(k in 1:(ncol(corr_total[[1]]) )){
+  for(j in 1:(i+1) ){
+    for(k in 1:(i+1)){
       if(j==1&k>1){
-        corr_total[[i]][j,k]=cor(BMI[,3],Met[,k-1+2])
+        x1=btotal[[i]]
+        x2=atotal[[k-1]]
+        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        corr_total[[i]][j,k]=cor(y1,y2)
       }
       if(k==1&j>1){
-        corr_total[[i]][j,k]=cor(BMI[,3],Met[,j-1+2])
+        x1=btotal[[i]]
+        x2=atotal[[j-1]]
+        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        corr_total[[i]][j,k]=cor(y1,y2)
       }
       if(k>1&j>1){
-        corr_total[[i]][j,k]=cor(Met[,k-1+2],Met[,j-1+2])
+        x1=atotal[[k-1]]
+        x2=atotal[[j-1]]
+        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        corr_total[[i]][j,k]=cor(y1,y2)
       }
     }
   }
 }
+
 
 
 numcov=1:Ncov
