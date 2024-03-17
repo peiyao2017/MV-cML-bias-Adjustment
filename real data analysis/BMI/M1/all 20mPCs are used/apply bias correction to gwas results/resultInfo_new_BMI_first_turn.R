@@ -79,33 +79,32 @@ Met=read.table(file="MET_20PC.txt",header = TRUE,sep="\t")
 BMI=read.table(file="BMI.txt",header = TRUE,sep="\t")
 
 for(i in 1:length(btotal)){
-  for(j in 1:(i+1) ){
-    for(k in 1:(i+1)){
+  for(j in 1:(nrow(corr_total[[1]]) )){
+    for(k in 1:(ncol(corr_total[[1]]) )){
       if(j==1&k>1){
         x1=btotal[[i]]
         x2=atotal[[k-1]]
-        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
-        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y1=x1$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
         corr_total[[i]][j,k]=cor(y1,y2)
       }
       if(k==1&j>1){
         x1=btotal[[i]]
         x2=atotal[[j-1]]
-        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
-        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y1=x1$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
         corr_total[[i]][j,k]=cor(y1,y2)
       }
       if(k>1&j>1){
         x1=atotal[[k-1]]
         x2=atotal[[j-1]]
-        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
-        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y1=x1$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
         corr_total[[i]][j,k]=cor(y1,y2)
       }
     }
   }
 }
-
 
 
 numcov=1:Ncov
@@ -1110,23 +1109,23 @@ for(u in 1:length(numcov)){
     varbetaGYadj_ivw2=numeric()
     
     
-    for(j1 in 1:nsnpstotal){
-      betaGYadj_egger[j1]=betaGYC[j1]-t(b_egger)%*%betaGX1[j1,]
-      betaGYadj_median[j1]=betaGYC[j1]-t(b_median)%*%betaGX1[j1,]
-      betaGYadj_lasso[j1]=betaGYC[j1]-t(b_lasso)%*%betaGX1[j1,]
-      betaGYadj_ivw[j1]=betaGYC[j1]-t(b_ivw)%*%betaGX1[j1,]
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
       covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
       covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
-      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
-      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
-      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,] 
-      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,] 
+      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
+      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
       varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
       varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
       varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
       varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
-      print(j1)
     }
+    
     
     SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
     
@@ -1564,22 +1563,21 @@ for(u in 1:length(numcov)){
     varbetaGYadj_ivw2=numeric()
     
     
-    for(j1 in 1:nsnpstotal){
-      betaGYadj_egger[j1]=betaGYC[j1]-t(b_egger)%*%betaGX1[j1,]
-      betaGYadj_median[j1]=betaGYC[j1]-t(b_median)%*%betaGX1[j1,]
-      betaGYadj_lasso[j1]=betaGYC[j1]-t(b_lasso)%*%betaGX1[j1,]
-      betaGYadj_ivw[j1]=betaGYC[j1]-t(b_ivw)%*%betaGX1[j1,]
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
       covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
       covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
       varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
       varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
-      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,] 
-      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,] 
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
       varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
       varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
       varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
       varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
-      print(j1)
     }
     
     SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
@@ -2019,22 +2017,21 @@ for(u in 1:length(numcov)){
     varbetaGYadj_ivw2=numeric()
     
     
-    for(j1 in 1:nsnpstotal){
-      betaGYadj_egger[j1]=betaGYC[j1]-t(b_egger)%*%betaGX1[j1,]
-      betaGYadj_median[j1]=betaGYC[j1]-t(b_median)%*%betaGX1[j1,]
-      betaGYadj_lasso[j1]=betaGYC[j1]-t(b_lasso)%*%betaGX1[j1,]
-      betaGYadj_ivw[j1]=betaGYC[j1]-t(b_ivw)%*%betaGX1[j1,]
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
       covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
       covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
       varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
       varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
-      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,] 
-      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,] 
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
       varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
       varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
       varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
       varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
-      print(j1)
     }
     
     SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
@@ -2474,22 +2471,21 @@ for(u in 1:length(numcov)){
     varbetaGYadj_ivw2=numeric()
     
     
-    for(j1 in 1:nsnpstotal){
-      betaGYadj_egger[j1]=betaGYC[j1]-t(b_egger)%*%betaGX1[j1,]
-      betaGYadj_median[j1]=betaGYC[j1]-t(b_median)%*%betaGX1[j1,]
-      betaGYadj_lasso[j1]=betaGYC[j1]-t(b_lasso)%*%betaGX1[j1,]
-      betaGYadj_ivw[j1]=betaGYC[j1]-t(b_ivw)%*%betaGX1[j1,]
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
       covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
       covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
       varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
       varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
-      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,] 
-      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,] 
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
       varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
       varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
       varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
       varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
-      print(j1)
     }
     
     SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
