@@ -7,7 +7,7 @@ myCluster <- makeCluster(number_of_cores- 12, # number of cores to use
                          type = "PSOCK") # type of cluster
 #notice that we need to leave one core for computer system
 registerDoParallel(myCluster)
-Ncov=5
+Ncov=10
 library(mvtnorm)
 library(doParallel)
 library(MASS)
@@ -84,30 +84,27 @@ for(i in 1:length(btotal)){
       if(j==1&k>1){
         x1=btotal[[i]]
         x2=atotal[[k-1]]
-        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
-        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y1=x1$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
         corr_total[[i]][j,k]=cor(y1,y2)
       }
       if(k==1&j>1){
         x1=btotal[[i]]
         x2=atotal[[j-1]]
-        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
-        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y1=x1$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
         corr_total[[i]][j,k]=cor(y1,y2)
       }
       if(k>1&j>1){
         x1=atotal[[k-1]]
         x2=atotal[[j-1]]
-        y1=x1$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
-        y2=x2$V11[x1$V12>0.5&x2$V3%in%IVID&x2$V12>0.5&x2$V3%in%IVID]
+        y1=x1$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
+        y2=x2$V11[x1$V12>0.1&x2$V3%in%IVID&x2$V12>0.1&x2$V3%in%IVID]
         corr_total[[i]][j,k]=cor(y1,y2)
       }
     }
   }
 }
-
-
-
 
 numcov=1:Ncov
 name=numeric()
@@ -287,7 +284,7 @@ cml_MA=function(N=Nsample,p=ncol(betaGX1),m=nrow(betaGX_IV),betax=betaGX_IV,beta
 }  
 
 
-for(u in 1:length(numcov)){
+for(u in 1:Ncov){
   if(u==1){
     d=u
     usecov=1:numcov[u]
@@ -1116,22 +1113,21 @@ for(u in 1:length(numcov)){
     varbetaGYadj_ivw2=numeric()
     
     
-    for(j1 in 1:nsnpstotal){
-      betaGYadj_egger[j1]=betaGYC[j1]-t(b_egger)%*%betaGX1[j1,]
-      betaGYadj_median[j1]=betaGYC[j1]-t(b_median)%*%betaGX1[j1,]
-      betaGYadj_lasso[j1]=betaGYC[j1]-t(b_lasso)%*%betaGX1[j1,]
-      betaGYadj_ivw[j1]=betaGYC[j1]-t(b_ivw)%*%betaGX1[j1,]
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
       covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
       covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
-      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
-      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
-      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,] 
-      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,] 
+      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
+      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
       varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
       varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
       varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
       varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
-      print(j1)
     }
     
     SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
@@ -1570,22 +1566,21 @@ for(u in 1:length(numcov)){
     varbetaGYadj_ivw2=numeric()
     
     
-    for(j1 in 1:nsnpstotal){
-      betaGYadj_egger[j1]=betaGYC[j1]-t(b_egger)%*%betaGX1[j1,]
-      betaGYadj_median[j1]=betaGYC[j1]-t(b_median)%*%betaGX1[j1,]
-      betaGYadj_lasso[j1]=betaGYC[j1]-t(b_lasso)%*%betaGX1[j1,]
-      betaGYadj_ivw[j1]=betaGYC[j1]-t(b_ivw)%*%betaGX1[j1,]
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
       covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
       covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
       varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
       varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
-      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,] 
-      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,] 
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
       varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
       varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
       varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
       varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
-      print(j1)
     }
     
     SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
@@ -2025,22 +2020,21 @@ for(u in 1:length(numcov)){
     varbetaGYadj_ivw2=numeric()
     
     
-    for(j1 in 1:nsnpstotal){
-      betaGYadj_egger[j1]=betaGYC[j1]-t(b_egger)%*%betaGX1[j1,]
-      betaGYadj_median[j1]=betaGYC[j1]-t(b_median)%*%betaGX1[j1,]
-      betaGYadj_lasso[j1]=betaGYC[j1]-t(b_lasso)%*%betaGX1[j1,]
-      betaGYadj_ivw[j1]=betaGYC[j1]-t(b_ivw)%*%betaGX1[j1,]
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
       covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
       covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
       varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
       varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
-      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,] 
-      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,] 
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
       varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
       varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
       varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
       varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
-      print(j1)
     }
     
     SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
@@ -2480,22 +2474,2291 @@ for(u in 1:length(numcov)){
     varbetaGYadj_ivw2=numeric()
     
     
-    for(j1 in 1:nsnpstotal){
-      betaGYadj_egger[j1]=betaGYC[j1]-t(b_egger)%*%betaGX1[j1,]
-      betaGYadj_median[j1]=betaGYC[j1]-t(b_median)%*%betaGX1[j1,]
-      betaGYadj_lasso[j1]=betaGYC[j1]-t(b_lasso)%*%betaGX1[j1,]
-      betaGYadj_ivw[j1]=betaGYC[j1]-t(b_ivw)%*%betaGX1[j1,]
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
       covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
       covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
       varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
       varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
-      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,] 
-      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax)) +t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,] 
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
       varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
       varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
       varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
       varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
-      print(j1)
+    }
+    
+    SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
+    
+    SDbetaGYadj_egger2=sqrt(varbetaGYadj_egger2) 
+    
+    
+    
+    z_egger1=abs(betaGYadj_egger/SDbetaGYadj_egger1)
+    
+    z_egger2=abs(betaGYadj_egger/SDbetaGYadj_egger2)
+    
+    
+    
+    pvalueadj_egger1=(1-pnorm(z_egger1))*2
+    
+    pvalueadj_egger2=(1-pnorm(z_egger2))*2
+    
+    
+    SDbetaGYadj_ivw1=sqrt(varbetaGYadj_ivw1) 
+    SDbetaGYadj_lasso1=sqrt(varbetaGYadj_lasso1)
+    SDbetaGYadj_median1=sqrt(varbetaGYadj_median1)
+    SDbetaGYadj_ivw2=sqrt(varbetaGYadj_ivw2) 
+    SDbetaGYadj_lasso2=sqrt(varbetaGYadj_lasso2)
+    SDbetaGYadj_median2=sqrt(varbetaGYadj_median2)
+    
+    
+    
+    z_ivw1=abs(betaGYadj_ivw/SDbetaGYadj_ivw1)
+    z_median1=abs(betaGYadj_median/SDbetaGYadj_median1)
+    z_lasso1=abs(betaGYadj_lasso/SDbetaGYadj_lasso1)
+    z_ivw2=abs(betaGYadj_ivw/SDbetaGYadj_ivw2)
+    z_median2=abs(betaGYadj_median/SDbetaGYadj_median2)
+    z_lasso2=abs(betaGYadj_lasso/SDbetaGYadj_lasso2)
+    
+    
+    
+    pvalueadj_ivw1=(1-pnorm(z_ivw1))*2
+    pvalueadj_median1=(1-pnorm(z_median1))*2
+    pvalueadj_lasso1=(1-pnorm(z_lasso1))*2
+    pvalueadj_ivw2=(1-pnorm(z_ivw2))*2
+    pvalueadj_median2=(1-pnorm(z_median2))*2
+    pvalueadj_lasso2=(1-pnorm(z_lasso2))*2
+    resultMVMREgger=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_egger,sd_adj=SDbetaGYadj_egger1,p_adj=pvalueadj_egger1,sd_adj2=SDbetaGYadj_egger2,p_adj2=pvalueadj_egger2)
+    resultMVMRLasso=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_lasso,sd_adj=SDbetaGYadj_lasso1,p_adj=pvalueadj_lasso1,sd_adj2=SDbetaGYadj_lasso2,p_adj2=pvalueadj_lasso2)
+    resultMVMRMedian=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_median,sd_adj=SDbetaGYadj_median1,p_adj=pvalueadj_median1,sd_adj2=SDbetaGYadj_median2,p_adj2=pvalueadj_median2)
+    resultMVMRIVW=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_ivw,sd_adj=SDbetaGYadj_ivw1,p_adj=pvalueadj_ivw1,sd_adj2=SDbetaGYadj_ivw2,p_adj2=pvalueadj_ivw2)
+    
+    slope=matrix(0,ncol=5*d,nrow=1)
+    slope_se=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope[i,]=c( b,b_egger,b_ivw,b_lasso,b_median)
+      slope_se[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_egger)),sqrt(diag(covb_ivw)),sqrt(diag(covb_lasso)),sqrt(diag(covb_median)))
+    }
+    
+    slope_temp=matrix(0,ncol=5*d,nrow=1)
+    slope_se_temp=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope_temp[i,]=c( b,b_temp_egger,b_temp_ivw,b_temp_lasso,b_temp_median)
+      slope_se_temp[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_temp_egger)),sqrt(diag(covb_temp_ivw)),sqrt(diag(covb_temp_lasso)),sqrt(diag(covb_temp_median)))
+    }
+    
+    
+    name2=numeric()
+    name3=numeric()
+    name4=numeric()
+    name5=numeric()
+    name6=numeric()
+    
+    for(i in 1:d){
+      
+      name2[i]=paste("cml_slop",i,sep="")
+      name3[i]=paste("egger_slop",i,sep="")
+      name4[i]=paste("ivw_slop",i,sep="")
+      name5[i]=paste("lasso_slop",i,sep="")
+      name6[i]=paste("median_slop",i,sep="")
+    }
+    
+    name2se=numeric()
+    name3se=numeric()
+    name4se=numeric()
+    name5se=numeric()
+    name6se=numeric()
+    
+    for(i in 1:d){
+      
+      name2se[i]=paste("cml_slop_se",i,sep="")
+      name3se[i]=paste("egger_slop_se",i,sep="")
+      name4se[i]=paste("ivw_slop_se",i,sep="")
+      name5se[i]=paste("lasso_slop_se",i,sep="")
+      name6se[i]=paste("median_slop_se",i,sep="")
+    }
+    slope=as.data.frame(slope)
+    colnames(slope)=c( name2,name3,name4,name5,name6)
+    slope_se=as.data.frame(slope_se)
+    colnames(slope_se)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    slope_temp=as.data.frame(slope_temp)
+    colnames(slope_temp)=c( name2,name3,name4,name5,name6)
+    slope_se_temp=as.data.frame(slope_se_temp)
+    colnames(slope_se_temp)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    
+    write.table(resultMVMRcML,file=paste("resultMVMRcML",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRLasso,file=paste("resultLasso",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRMedian,file=paste("resultMedian",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRIVW,file=paste("resultMVMRIVW",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMREgger,file=paste("resultEgger",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    
+    slopetotal=list(slope=slope,slope_se=slope_se,slope_temp=slope_temp,slope_se_temp=slope_se_temp)
+    save(slopetotal,file = paste("BMI_M1_second_turn_slope",u,".RData",sep=""))
+    
+  }
+  if(u==6){
+    d=u
+    usecov=1:numcov[u]
+    d=numcov[u]
+    betaGX1= as.matrix(betaGX1total[,usecov])
+    pvaluebetaGX1=as.matrix(pvaluebetaGX1total[,usecov])
+    sdbetaGX1=as.matrix(sdbetaGX1total[,usecov])
+    ZX1=as.matrix(ZX1total[,usecov])
+    betaGYC=betaGYCtotal[,u]
+    pvaluebetaGYC=pvaluebetaGYCtotal[,u]
+    sdbetaGYC=sdbetaGYCtotal[,u]
+    ZYC=ZYCtotal[,u]
+    correlation1=corr_total[[u]][c(1,1+usecov),c(1,1+usecov)]
+    gwas_X=list()
+    for(i1 in 1:numcov[u]){
+      gwas_X[[i1]]=data.frame(rs=ID,beta=betaGX1[,i1],s.d.=sdbetaGX1[,i1],Tstat=ZX1[,i1],p=pvaluebetaGX1[,i1])
+      row.names(gwas_X[[i1]])=ID
+    }
+    gwas_y=data.frame(rs=ID,beta=betaGYC,s.d.=sdbetaGYC,Tstat=ZYC,p=pvaluebetaGYC)
+    row.names(gwas_y)=ID
+    if(numcov[u]==1){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))
+    }
+    if(numcov[u]==2){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+    }
+    
+    if(numcov[u]>=3&numcov[u]<11){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    if(numcov[u]>=11){
+      pvalX=1e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    
+    sum(IV)
+    used=gene1$V3[IV]
+    betaGX_IV=as.matrix(betaGX1[IV,])
+    betaGYC_IV=betaGYC[IV]
+    sdbetaGX_IV=as.matrix(sdbetaGX1[IV,])
+    sdbetaGYC_IV=sdbetaGYC[IV]
+    pvaluebetaGX_IV=as.matrix(pvaluebetaGX1[IV,])
+    pvaluebetaGYC_IV=pvaluebetaGYC[IV ]
+    rs_IV=gene1$V3[IV]
+    
+    SIG=list()
+    for(i in 1:sum(IV)){
+      SIG[[i]]=diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))%*%correlation1%*%diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))
+    }
+    
+    
+    
+    
+    Want=cml_MA(N=Nsample,p=ncol(betaGX1),m=nrow(betaGX_IV),betax=betaGX_IV,betayc=betaGYC_IV,SIG1=SIG,threshold=0.01,maxit=500)
+    
+    b=Want$b
+    covb=Want$Covb
+    if(min(eigen(covb)$values)<0){
+      covb=covb+diag((-1.001)*min(eigen(covb)$values),nrow=d,ncol = d)
+    }
+    valid=Want$validuse
+    betaxvalid=Want$betaxvalid
+    betaxIVvalid=Want$betaxIVvalid
+    used=used[valid]
+    Omega=Want$Omega
+    print("function finish")
+    
+    betaGYadj=numeric()
+    for(i in 1:nsnpstotal){
+      betaGYadj[i]=betaGYC[i]-t(b)%*%betaGX1[i,]
+    }
+    
+    sdbetaGYadj2=numeric()
+    ld=matrix(0,nrow=nsnpstotal,ncol=length(used))
+    row.names(ld)=ID
+    colnames(ld)=used
+    
+    
+    blocks=read.table("fourier_ls_all.bed.txt",header = TRUE)
+    blocks_used=list()
+    chr_used=chr[ID%in%used]
+    for(i in 1:length(used)){
+      blocks_used[[i]]=numeric()
+      blockstemp=blocks[blocks$chr==chr_used[i],]
+      starttemp=blockstemp$start
+      stoptemp=blockstemp$stop
+      snpstemp=ID[chr==chr_used[i]]
+      BP_temp=BP[ID%in%snpstemp]
+      BP_tar=BP[ID==used[i]]
+      for(i1 in 1:length(starttemp)){
+        if(BP_tar>=starttemp[i1]&BP_tar<=stoptemp[i1]){
+          startar=starttemp[i1]
+          stoptar=stoptemp[i1]
+        }
+      }
+      for(i1 in 1:length(snpstemp)){
+        if(BP_temp[i1]>=startar&BP_temp[i1]<=stoptar){
+          blocks_used[[i]]=c(blocks_used[[i]],snpstemp[i1])
+        }
+      }
+      print(i)
+    }
+    
+    ld=list()
+    for(i in 1:length(used)){
+      ld[[i]]=numeric()
+      for(i1 in 1:length(blocks_used[[i]])){
+        ld[[i]][i1]=cor(G[,used[i]],G[,blocks_used[[i]][i1]],use = "pairwise.complete.obs")
+        
+      }
+      names(ld[[i]])=blocks_used[[i]]
+      print(i)
+    }
+    
+    
+    
+    
+    gwas_XIV=list()
+    for(i1 in 1:numcov[u]){
+      gwas_XIV[[i1]]=data.frame(rs=used,beta=betaGX1[,i1][ID%in%used],s.d.=sdbetaGX1[,i1][ID%in%used],Tstat=ZX1[,i1][ID%in%used],p=pvaluebetaGX1[,i1][ID%in%used])
+      row.names(gwas_XIV[[i1]])=used
+    }
+    gwas_yIV=data.frame(rs=used,beta=betaGYC[ID%in%used],s.d.=sdbetaGYC[ID%in%used],Tstat=ZYC[ID%in%used],p=pvaluebetaGYC[ID%in%used])
+    row.names(gwas_yIV)=used
+    
+    
+    niv=length(used)
+    
+    varbeta3=foreach(i=1:nsnpstotal,.combine = "c")%dopar%{
+      library(Matrix)
+      ldi=rep(0,times=niv)
+      for(i1 in 1:niv){
+        if(ID[i]%in%names(ld[[i1]])){
+          ldi[i1]=ld[[i1]][ID[i]]
+        }
+      }
+      rs=0
+      beta=0
+      s.d.=0
+      Tstat=0
+      p=0
+      GX=data.frame(rs,beta,s.d.,Tstat,p)
+      GY=GX
+      ZY=GX
+      ZX=list()
+      for(i1 in 1:length(used)){
+        ZX[[i1]]=GX
+        for(i2 in 1:d){
+          ZX[[i1]][i2,]=gwas_XIV[[i2]][used[i1],]
+        }
+        ZY[i1,]=gwas_yIV[used[i1],]
+      }
+      
+      for(i1 in 1:d){
+        GX[i1,]=gwas_X[[i1]][i,]
+      }
+      GY[1,]=gwas_y[i,]
+      sigmaG=diag(c(GY$s.d.,GX$s.d.))%*%correlation1%*%diag(c(GY$s.d.,GX$s.d.))
+      sigmaGZY=list()
+      for(i1 in 1:niv){
+        sigmaGZY[[i1]]=matrix(ldi[i1]*c(GY$s.d.,GX$s.d.)*ZY$s.d.[i1]*correlation1[1,],nrow=d+1,ncol=1)
+      }
+      sigmaGZH=list()
+      for(i1 in 1:niv){
+        sigmaGZH[[i1]]=matrix(0,nrow=d+1,ncol=d)
+        for(i2 in 1:d+1){
+          if(i2==1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GY$s.d.*ZX[[i1]]$s.d.*correlation1[1,(2:(d+1))]
+          }
+          if(i2>1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GX$s.d.[i2-1]*ZX[[i1]]$s.d.*correlation1[i2,(2:(d+1))]
+          }
+        }
+      }
+      sigmaZ=bdiag(SIG[valid])
+      for(i1 in 1:length(used)){
+        if(i1==1){
+          sigma12=cbind(sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+        if(i1>1){
+          sigma12=cbind(sigma12,sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+      }
+      SIGMA1=cbind(sigmaG,sigma12)
+      SIGMA2=cbind(t(sigma12),sigmaZ)
+      SIGMA=rbind(SIGMA1,SIGMA2)
+      U1=bdiag(diag(1,nrow=d+1,ncol=d+1),Omega)%*%SIGMA%*%t(bdiag(diag(1,nrow=d+1,ncol=d+1),Omega))
+      v=c(1,-b,-GX$beta)
+      if(min(eigen(U1)$values)<0){
+        U1=U1+(-min(eigen(U1)$values))*1.001*diag(1,nrow=nrow(U1),ncol=ncol(U1))
+      }
+      out=as.numeric(t(v)%*%U1%*%v)
+    }
+    sdbetaGYadj=sqrt(varbeta3)
+    
+    
+    for(i in 1:nsnpstotal){
+      a=sdbetaGYC[i]^2
+      b1=t(betaGX1[i,])%*%covb%*%betaGX1[i,]
+      c=sum(b^2*as.vector(sdbetaGX1[i,]^2))
+      d=sum(diag(covb)*sdbetaGX1[i,]^2)
+      sdbetaGYadj2[i]=sqrt(a+b1+c+d)
+    }
+    
+    z=abs(betaGYadj/sdbetaGYadj)
+    pvalueadj=(1-pnorm(z))*2
+    z2=abs(betaGYadj/sdbetaGYadj2)
+    pvalueadj2=(1-pnorm(z2))*2
+    resultMVMRcML=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj,sd_adj=sdbetaGYadj,p_adj=pvalueadj,sd_adj2=sdbetaGYadj2,p_adj2=pvalueadj2)
+    
+    
+    library(MendelianRandomization)
+    del=which(rs_IV%in%used==FALSE)
+    d=u
+    DP=200
+    bDP_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_median=matrix(0,nrow=DP,ncol=d)
+    betaGX_IV2=betaGX_IV
+    betaGYC_IV2=betaGYC_IV
+    sdbetaGX_IV2=sdbetaGX_IV
+    sdbetaGYC_IV2=sdbetaGYC_IV
+    SIG2=SIG
+    pvaluebetaGX_IV2=pvaluebetaGX_IV 
+    pvaluebetaGYC_IV2=pvaluebetaGYC_IV
+    if(length(del)>0){
+      betaGX_IV2=as.matrix(betaGX_IV2[-del,])
+      betaGYC_IV2=betaGYC_IV[-del ]
+      sdbetaGX_IV2=as.matrix(sdbetaGX_IV[-del,])
+      sdbetaGYC_IV2=sdbetaGYC_IV[-del ]
+      SIG2=SIG[-del ]
+      pvaluebetaGX_IV2=as.matrix(pvaluebetaGX_IV[-del,]) 
+      pvaluebetaGYC_IV2=pvaluebetaGYC_IV[-del ]
+    }
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV2 ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV2 )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV2 )[i],(betaGX_IV2 )[i,]),Sigma = (SIG2 )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV2 ,by=betaY,byse =sdbetaGYC_IV2 )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_egger[j,]=egger$Estimate
+      bDP_ivw[j,]=ivw$Estimate
+      bDP_lasso[j,]=lasso$Estimate
+      bDP_median[j,]=median1$Estimate
+      
+    }
+    b_egger=colMeans(bDP_egger)
+    covb_egger=cov(bDP_egger)
+    b_ivw=colMeans(bDP_ivw)
+    covb_ivw=cov(bDP_ivw)
+    b_lasso=colMeans(bDP_lasso)
+    covb_lasso=cov(bDP_lasso) 
+    b_median=colMeans(bDP_median)
+    covb_median=cov(bDP_median) 
+    
+    
+    
+    bDP_temp_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_median=matrix(0,nrow=DP,ncol=d)
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV )[i],(betaGX_IV )[i,]),Sigma = (SIG )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV ,by=betaY,byse =sdbetaGYC_IV )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_temp_egger[j,]=egger$Estimate
+      bDP_temp_ivw[j,]=ivw$Estimate
+      bDP_temp_lasso[j,]=lasso$Estimate
+      bDP_temp_median[j,]=median1$Estimate
+      
+    }
+    b_temp_egger=colMeans(bDP_temp_egger)
+    covb_temp_egger=cov(bDP_temp_egger)
+    b_temp_ivw=colMeans(bDP_temp_ivw)
+    covb_temp_ivw=cov(bDP_temp_ivw)
+    b_temp_lasso=colMeans(bDP_temp_lasso)
+    covb_temp_lasso=cov(bDP_temp_lasso) 
+    b_temp_median=colMeans(bDP_temp_median)
+    covb_temp_median=cov(bDP_temp_median) 
+    
+    
+    
+    betaGYadj_egger=numeric()
+    betaGYadj_lasso=numeric()
+    betaGYadj_median=numeric()
+    betaGYadj_ivw=numeric()
+    varbetaGYadj_egger1=numeric()
+    varbetaGYadj_lasso1=numeric()
+    varbetaGYadj_median1=numeric()
+    varbetaGYadj_ivw1=numeric()
+    varbetaGYadj_egger2=numeric()
+    varbetaGYadj_lasso2=numeric()
+    varbetaGYadj_median2=numeric()
+    varbetaGYadj_ivw2=numeric()
+    
+    
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
+      covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
+      covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
+      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
+      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
+      varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
+      varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
+      varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
+      varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
+    }
+    
+    SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
+    
+    SDbetaGYadj_egger2=sqrt(varbetaGYadj_egger2) 
+    
+    
+    
+    z_egger1=abs(betaGYadj_egger/SDbetaGYadj_egger1)
+    
+    z_egger2=abs(betaGYadj_egger/SDbetaGYadj_egger2)
+    
+    
+    
+    pvalueadj_egger1=(1-pnorm(z_egger1))*2
+    
+    pvalueadj_egger2=(1-pnorm(z_egger2))*2
+    
+    
+    SDbetaGYadj_ivw1=sqrt(varbetaGYadj_ivw1) 
+    SDbetaGYadj_lasso1=sqrt(varbetaGYadj_lasso1)
+    SDbetaGYadj_median1=sqrt(varbetaGYadj_median1)
+    SDbetaGYadj_ivw2=sqrt(varbetaGYadj_ivw2) 
+    SDbetaGYadj_lasso2=sqrt(varbetaGYadj_lasso2)
+    SDbetaGYadj_median2=sqrt(varbetaGYadj_median2)
+    
+    
+    
+    z_ivw1=abs(betaGYadj_ivw/SDbetaGYadj_ivw1)
+    z_median1=abs(betaGYadj_median/SDbetaGYadj_median1)
+    z_lasso1=abs(betaGYadj_lasso/SDbetaGYadj_lasso1)
+    z_ivw2=abs(betaGYadj_ivw/SDbetaGYadj_ivw2)
+    z_median2=abs(betaGYadj_median/SDbetaGYadj_median2)
+    z_lasso2=abs(betaGYadj_lasso/SDbetaGYadj_lasso2)
+    
+    
+    
+    pvalueadj_ivw1=(1-pnorm(z_ivw1))*2
+    pvalueadj_median1=(1-pnorm(z_median1))*2
+    pvalueadj_lasso1=(1-pnorm(z_lasso1))*2
+    pvalueadj_ivw2=(1-pnorm(z_ivw2))*2
+    pvalueadj_median2=(1-pnorm(z_median2))*2
+    pvalueadj_lasso2=(1-pnorm(z_lasso2))*2
+    resultMVMREgger=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_egger,sd_adj=SDbetaGYadj_egger1,p_adj=pvalueadj_egger1,sd_adj2=SDbetaGYadj_egger2,p_adj2=pvalueadj_egger2)
+    resultMVMRLasso=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_lasso,sd_adj=SDbetaGYadj_lasso1,p_adj=pvalueadj_lasso1,sd_adj2=SDbetaGYadj_lasso2,p_adj2=pvalueadj_lasso2)
+    resultMVMRMedian=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_median,sd_adj=SDbetaGYadj_median1,p_adj=pvalueadj_median1,sd_adj2=SDbetaGYadj_median2,p_adj2=pvalueadj_median2)
+    resultMVMRIVW=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_ivw,sd_adj=SDbetaGYadj_ivw1,p_adj=pvalueadj_ivw1,sd_adj2=SDbetaGYadj_ivw2,p_adj2=pvalueadj_ivw2)
+    
+    slope=matrix(0,ncol=5*d,nrow=1)
+    slope_se=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope[i,]=c( b,b_egger,b_ivw,b_lasso,b_median)
+      slope_se[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_egger)),sqrt(diag(covb_ivw)),sqrt(diag(covb_lasso)),sqrt(diag(covb_median)))
+    }
+    
+    slope_temp=matrix(0,ncol=5*d,nrow=1)
+    slope_se_temp=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope_temp[i,]=c( b,b_temp_egger,b_temp_ivw,b_temp_lasso,b_temp_median)
+      slope_se_temp[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_temp_egger)),sqrt(diag(covb_temp_ivw)),sqrt(diag(covb_temp_lasso)),sqrt(diag(covb_temp_median)))
+    }
+    
+    
+    name2=numeric()
+    name3=numeric()
+    name4=numeric()
+    name5=numeric()
+    name6=numeric()
+    
+    for(i in 1:d){
+      
+      name2[i]=paste("cml_slop",i,sep="")
+      name3[i]=paste("egger_slop",i,sep="")
+      name4[i]=paste("ivw_slop",i,sep="")
+      name5[i]=paste("lasso_slop",i,sep="")
+      name6[i]=paste("median_slop",i,sep="")
+    }
+    
+    name2se=numeric()
+    name3se=numeric()
+    name4se=numeric()
+    name5se=numeric()
+    name6se=numeric()
+    
+    for(i in 1:d){
+      
+      name2se[i]=paste("cml_slop_se",i,sep="")
+      name3se[i]=paste("egger_slop_se",i,sep="")
+      name4se[i]=paste("ivw_slop_se",i,sep="")
+      name5se[i]=paste("lasso_slop_se",i,sep="")
+      name6se[i]=paste("median_slop_se",i,sep="")
+    }
+    slope=as.data.frame(slope)
+    colnames(slope)=c( name2,name3,name4,name5,name6)
+    slope_se=as.data.frame(slope_se)
+    colnames(slope_se)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    slope_temp=as.data.frame(slope_temp)
+    colnames(slope_temp)=c( name2,name3,name4,name5,name6)
+    slope_se_temp=as.data.frame(slope_se_temp)
+    colnames(slope_se_temp)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    
+    write.table(resultMVMRcML,file=paste("resultMVMRcML",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRLasso,file=paste("resultLasso",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRMedian,file=paste("resultMedian",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRIVW,file=paste("resultMVMRIVW",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMREgger,file=paste("resultEgger",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    
+    slopetotal=list(slope=slope,slope_se=slope_se,slope_temp=slope_temp,slope_se_temp=slope_se_temp)
+    save(slopetotal,file = paste("BMI_M1_second_turn_slope",u,".RData",sep=""))
+    
+  }
+  if(u==7){
+    d=u
+    usecov=1:numcov[u]
+    d=numcov[u]
+    betaGX1= as.matrix(betaGX1total[,usecov])
+    pvaluebetaGX1=as.matrix(pvaluebetaGX1total[,usecov])
+    sdbetaGX1=as.matrix(sdbetaGX1total[,usecov])
+    ZX1=as.matrix(ZX1total[,usecov])
+    betaGYC=betaGYCtotal[,u]
+    pvaluebetaGYC=pvaluebetaGYCtotal[,u]
+    sdbetaGYC=sdbetaGYCtotal[,u]
+    ZYC=ZYCtotal[,u]
+    correlation1=corr_total[[u]][c(1,1+usecov),c(1,1+usecov)]
+    gwas_X=list()
+    for(i1 in 1:numcov[u]){
+      gwas_X[[i1]]=data.frame(rs=ID,beta=betaGX1[,i1],s.d.=sdbetaGX1[,i1],Tstat=ZX1[,i1],p=pvaluebetaGX1[,i1])
+      row.names(gwas_X[[i1]])=ID
+    }
+    gwas_y=data.frame(rs=ID,beta=betaGYC,s.d.=sdbetaGYC,Tstat=ZYC,p=pvaluebetaGYC)
+    row.names(gwas_y)=ID
+    if(numcov[u]==1){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))
+    }
+    if(numcov[u]==2){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+    }
+    
+    if(numcov[u]>=3&numcov[u]<11){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    if(numcov[u]>=11){
+      pvalX=1e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    
+    sum(IV)
+    used=gene1$V3[IV]
+    betaGX_IV=as.matrix(betaGX1[IV,])
+    betaGYC_IV=betaGYC[IV]
+    sdbetaGX_IV=as.matrix(sdbetaGX1[IV,])
+    sdbetaGYC_IV=sdbetaGYC[IV]
+    pvaluebetaGX_IV=as.matrix(pvaluebetaGX1[IV,])
+    pvaluebetaGYC_IV=pvaluebetaGYC[IV ]
+    rs_IV=gene1$V3[IV]
+    
+    SIG=list()
+    for(i in 1:sum(IV)){
+      SIG[[i]]=diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))%*%correlation1%*%diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))
+    }
+    
+    
+    
+    
+    Want=cml_MA(N=Nsample,p=ncol(betaGX1),m=nrow(betaGX_IV),betax=betaGX_IV,betayc=betaGYC_IV,SIG1=SIG,threshold=0.01,maxit=500)
+    
+    b=Want$b
+    covb=Want$Covb
+    if(min(eigen(covb)$values)<0){
+      covb=covb+diag((-1.001)*min(eigen(covb)$values),nrow=d,ncol = d)
+    }
+    valid=Want$validuse
+    betaxvalid=Want$betaxvalid
+    betaxIVvalid=Want$betaxIVvalid
+    used=used[valid]
+    Omega=Want$Omega
+    print("function finish")
+    
+    betaGYadj=numeric()
+    for(i in 1:nsnpstotal){
+      betaGYadj[i]=betaGYC[i]-t(b)%*%betaGX1[i,]
+    }
+    
+    sdbetaGYadj2=numeric()
+    ld=matrix(0,nrow=nsnpstotal,ncol=length(used))
+    row.names(ld)=ID
+    colnames(ld)=used
+    
+    
+    blocks=read.table("fourier_ls_all.bed.txt",header = TRUE)
+    blocks_used=list()
+    chr_used=chr[ID%in%used]
+    for(i in 1:length(used)){
+      blocks_used[[i]]=numeric()
+      blockstemp=blocks[blocks$chr==chr_used[i],]
+      starttemp=blockstemp$start
+      stoptemp=blockstemp$stop
+      snpstemp=ID[chr==chr_used[i]]
+      BP_temp=BP[ID%in%snpstemp]
+      BP_tar=BP[ID==used[i]]
+      for(i1 in 1:length(starttemp)){
+        if(BP_tar>=starttemp[i1]&BP_tar<=stoptemp[i1]){
+          startar=starttemp[i1]
+          stoptar=stoptemp[i1]
+        }
+      }
+      for(i1 in 1:length(snpstemp)){
+        if(BP_temp[i1]>=startar&BP_temp[i1]<=stoptar){
+          blocks_used[[i]]=c(blocks_used[[i]],snpstemp[i1])
+        }
+      }
+      print(i)
+    }
+    
+    ld=list()
+    for(i in 1:length(used)){
+      ld[[i]]=numeric()
+      for(i1 in 1:length(blocks_used[[i]])){
+        ld[[i]][i1]=cor(G[,used[i]],G[,blocks_used[[i]][i1]],use = "pairwise.complete.obs")
+        
+      }
+      names(ld[[i]])=blocks_used[[i]]
+      print(i)
+    }
+    
+    
+    
+    
+    gwas_XIV=list()
+    for(i1 in 1:numcov[u]){
+      gwas_XIV[[i1]]=data.frame(rs=used,beta=betaGX1[,i1][ID%in%used],s.d.=sdbetaGX1[,i1][ID%in%used],Tstat=ZX1[,i1][ID%in%used],p=pvaluebetaGX1[,i1][ID%in%used])
+      row.names(gwas_XIV[[i1]])=used
+    }
+    gwas_yIV=data.frame(rs=used,beta=betaGYC[ID%in%used],s.d.=sdbetaGYC[ID%in%used],Tstat=ZYC[ID%in%used],p=pvaluebetaGYC[ID%in%used])
+    row.names(gwas_yIV)=used
+    
+    
+    niv=length(used)
+    
+    varbeta3=foreach(i=1:nsnpstotal,.combine = "c")%dopar%{
+      library(Matrix)
+      ldi=rep(0,times=niv)
+      for(i1 in 1:niv){
+        if(ID[i]%in%names(ld[[i1]])){
+          ldi[i1]=ld[[i1]][ID[i]]
+        }
+      }
+      rs=0
+      beta=0
+      s.d.=0
+      Tstat=0
+      p=0
+      GX=data.frame(rs,beta,s.d.,Tstat,p)
+      GY=GX
+      ZY=GX
+      ZX=list()
+      for(i1 in 1:length(used)){
+        ZX[[i1]]=GX
+        for(i2 in 1:d){
+          ZX[[i1]][i2,]=gwas_XIV[[i2]][used[i1],]
+        }
+        ZY[i1,]=gwas_yIV[used[i1],]
+      }
+      
+      for(i1 in 1:d){
+        GX[i1,]=gwas_X[[i1]][i,]
+      }
+      GY[1,]=gwas_y[i,]
+      sigmaG=diag(c(GY$s.d.,GX$s.d.))%*%correlation1%*%diag(c(GY$s.d.,GX$s.d.))
+      sigmaGZY=list()
+      for(i1 in 1:niv){
+        sigmaGZY[[i1]]=matrix(ldi[i1]*c(GY$s.d.,GX$s.d.)*ZY$s.d.[i1]*correlation1[1,],nrow=d+1,ncol=1)
+      }
+      sigmaGZH=list()
+      for(i1 in 1:niv){
+        sigmaGZH[[i1]]=matrix(0,nrow=d+1,ncol=d)
+        for(i2 in 1:d+1){
+          if(i2==1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GY$s.d.*ZX[[i1]]$s.d.*correlation1[1,(2:(d+1))]
+          }
+          if(i2>1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GX$s.d.[i2-1]*ZX[[i1]]$s.d.*correlation1[i2,(2:(d+1))]
+          }
+        }
+      }
+      sigmaZ=bdiag(SIG[valid])
+      for(i1 in 1:length(used)){
+        if(i1==1){
+          sigma12=cbind(sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+        if(i1>1){
+          sigma12=cbind(sigma12,sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+      }
+      SIGMA1=cbind(sigmaG,sigma12)
+      SIGMA2=cbind(t(sigma12),sigmaZ)
+      SIGMA=rbind(SIGMA1,SIGMA2)
+      U1=bdiag(diag(1,nrow=d+1,ncol=d+1),Omega)%*%SIGMA%*%t(bdiag(diag(1,nrow=d+1,ncol=d+1),Omega))
+      v=c(1,-b,-GX$beta)
+      if(min(eigen(U1)$values)<0){
+        U1=U1+(-min(eigen(U1)$values))*1.001*diag(1,nrow=nrow(U1),ncol=ncol(U1))
+      }
+      out=as.numeric(t(v)%*%U1%*%v)
+    }
+    sdbetaGYadj=sqrt(varbeta3)
+    
+    
+    for(i in 1:nsnpstotal){
+      a=sdbetaGYC[i]^2
+      b1=t(betaGX1[i,])%*%covb%*%betaGX1[i,]
+      c=sum(b^2*as.vector(sdbetaGX1[i,]^2))
+      d=sum(diag(covb)*sdbetaGX1[i,]^2)
+      sdbetaGYadj2[i]=sqrt(a+b1+c+d)
+    }
+    
+    z=abs(betaGYadj/sdbetaGYadj)
+    pvalueadj=(1-pnorm(z))*2
+    z2=abs(betaGYadj/sdbetaGYadj2)
+    pvalueadj2=(1-pnorm(z2))*2
+    resultMVMRcML=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj,sd_adj=sdbetaGYadj,p_adj=pvalueadj,sd_adj2=sdbetaGYadj2,p_adj2=pvalueadj2)
+    
+    
+    library(MendelianRandomization)
+    del=which(rs_IV%in%used==FALSE)
+    d=u
+    DP=200
+    bDP_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_median=matrix(0,nrow=DP,ncol=d)
+    betaGX_IV2=betaGX_IV
+    betaGYC_IV2=betaGYC_IV
+    sdbetaGX_IV2=sdbetaGX_IV
+    sdbetaGYC_IV2=sdbetaGYC_IV
+    SIG2=SIG
+    pvaluebetaGX_IV2=pvaluebetaGX_IV 
+    pvaluebetaGYC_IV2=pvaluebetaGYC_IV
+    if(length(del)>0){
+      betaGX_IV2=as.matrix(betaGX_IV2[-del,])
+      betaGYC_IV2=betaGYC_IV[-del ]
+      sdbetaGX_IV2=as.matrix(sdbetaGX_IV[-del,])
+      sdbetaGYC_IV2=sdbetaGYC_IV[-del ]
+      SIG2=SIG[-del ]
+      pvaluebetaGX_IV2=as.matrix(pvaluebetaGX_IV[-del,]) 
+      pvaluebetaGYC_IV2=pvaluebetaGYC_IV[-del ]
+    }
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV2 ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV2 )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV2 )[i],(betaGX_IV2 )[i,]),Sigma = (SIG2 )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV2 ,by=betaY,byse =sdbetaGYC_IV2 )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_egger[j,]=egger$Estimate
+      bDP_ivw[j,]=ivw$Estimate
+      bDP_lasso[j,]=lasso$Estimate
+      bDP_median[j,]=median1$Estimate
+      
+    }
+    b_egger=colMeans(bDP_egger)
+    covb_egger=cov(bDP_egger)
+    b_ivw=colMeans(bDP_ivw)
+    covb_ivw=cov(bDP_ivw)
+    b_lasso=colMeans(bDP_lasso)
+    covb_lasso=cov(bDP_lasso) 
+    b_median=colMeans(bDP_median)
+    covb_median=cov(bDP_median) 
+    
+    
+    
+    bDP_temp_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_median=matrix(0,nrow=DP,ncol=d)
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV )[i],(betaGX_IV )[i,]),Sigma = (SIG )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV ,by=betaY,byse =sdbetaGYC_IV )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_temp_egger[j,]=egger$Estimate
+      bDP_temp_ivw[j,]=ivw$Estimate
+      bDP_temp_lasso[j,]=lasso$Estimate
+      bDP_temp_median[j,]=median1$Estimate
+      
+    }
+    b_temp_egger=colMeans(bDP_temp_egger)
+    covb_temp_egger=cov(bDP_temp_egger)
+    b_temp_ivw=colMeans(bDP_temp_ivw)
+    covb_temp_ivw=cov(bDP_temp_ivw)
+    b_temp_lasso=colMeans(bDP_temp_lasso)
+    covb_temp_lasso=cov(bDP_temp_lasso) 
+    b_temp_median=colMeans(bDP_temp_median)
+    covb_temp_median=cov(bDP_temp_median) 
+    
+    
+    
+    betaGYadj_egger=numeric()
+    betaGYadj_lasso=numeric()
+    betaGYadj_median=numeric()
+    betaGYadj_ivw=numeric()
+    varbetaGYadj_egger1=numeric()
+    varbetaGYadj_lasso1=numeric()
+    varbetaGYadj_median1=numeric()
+    varbetaGYadj_ivw1=numeric()
+    varbetaGYadj_egger2=numeric()
+    varbetaGYadj_lasso2=numeric()
+    varbetaGYadj_median2=numeric()
+    varbetaGYadj_ivw2=numeric()
+    
+    
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
+      covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
+      covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
+      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
+      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
+      varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
+      varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
+      varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
+      varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
+    }
+    
+    SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
+    
+    SDbetaGYadj_egger2=sqrt(varbetaGYadj_egger2) 
+    
+    
+    
+    z_egger1=abs(betaGYadj_egger/SDbetaGYadj_egger1)
+    
+    z_egger2=abs(betaGYadj_egger/SDbetaGYadj_egger2)
+    
+    
+    
+    pvalueadj_egger1=(1-pnorm(z_egger1))*2
+    
+    pvalueadj_egger2=(1-pnorm(z_egger2))*2
+    
+    
+    SDbetaGYadj_ivw1=sqrt(varbetaGYadj_ivw1) 
+    SDbetaGYadj_lasso1=sqrt(varbetaGYadj_lasso1)
+    SDbetaGYadj_median1=sqrt(varbetaGYadj_median1)
+    SDbetaGYadj_ivw2=sqrt(varbetaGYadj_ivw2) 
+    SDbetaGYadj_lasso2=sqrt(varbetaGYadj_lasso2)
+    SDbetaGYadj_median2=sqrt(varbetaGYadj_median2)
+    
+    
+    
+    z_ivw1=abs(betaGYadj_ivw/SDbetaGYadj_ivw1)
+    z_median1=abs(betaGYadj_median/SDbetaGYadj_median1)
+    z_lasso1=abs(betaGYadj_lasso/SDbetaGYadj_lasso1)
+    z_ivw2=abs(betaGYadj_ivw/SDbetaGYadj_ivw2)
+    z_median2=abs(betaGYadj_median/SDbetaGYadj_median2)
+    z_lasso2=abs(betaGYadj_lasso/SDbetaGYadj_lasso2)
+    
+    
+    
+    pvalueadj_ivw1=(1-pnorm(z_ivw1))*2
+    pvalueadj_median1=(1-pnorm(z_median1))*2
+    pvalueadj_lasso1=(1-pnorm(z_lasso1))*2
+    pvalueadj_ivw2=(1-pnorm(z_ivw2))*2
+    pvalueadj_median2=(1-pnorm(z_median2))*2
+    pvalueadj_lasso2=(1-pnorm(z_lasso2))*2
+    resultMVMREgger=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_egger,sd_adj=SDbetaGYadj_egger1,p_adj=pvalueadj_egger1,sd_adj2=SDbetaGYadj_egger2,p_adj2=pvalueadj_egger2)
+    resultMVMRLasso=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_lasso,sd_adj=SDbetaGYadj_lasso1,p_adj=pvalueadj_lasso1,sd_adj2=SDbetaGYadj_lasso2,p_adj2=pvalueadj_lasso2)
+    resultMVMRMedian=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_median,sd_adj=SDbetaGYadj_median1,p_adj=pvalueadj_median1,sd_adj2=SDbetaGYadj_median2,p_adj2=pvalueadj_median2)
+    resultMVMRIVW=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_ivw,sd_adj=SDbetaGYadj_ivw1,p_adj=pvalueadj_ivw1,sd_adj2=SDbetaGYadj_ivw2,p_adj2=pvalueadj_ivw2)
+    
+    slope=matrix(0,ncol=5*d,nrow=1)
+    slope_se=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope[i,]=c( b,b_egger,b_ivw,b_lasso,b_median)
+      slope_se[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_egger)),sqrt(diag(covb_ivw)),sqrt(diag(covb_lasso)),sqrt(diag(covb_median)))
+    }
+    
+    slope_temp=matrix(0,ncol=5*d,nrow=1)
+    slope_se_temp=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope_temp[i,]=c( b,b_temp_egger,b_temp_ivw,b_temp_lasso,b_temp_median)
+      slope_se_temp[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_temp_egger)),sqrt(diag(covb_temp_ivw)),sqrt(diag(covb_temp_lasso)),sqrt(diag(covb_temp_median)))
+    }
+    
+    
+    name2=numeric()
+    name3=numeric()
+    name4=numeric()
+    name5=numeric()
+    name6=numeric()
+    
+    for(i in 1:d){
+      
+      name2[i]=paste("cml_slop",i,sep="")
+      name3[i]=paste("egger_slop",i,sep="")
+      name4[i]=paste("ivw_slop",i,sep="")
+      name5[i]=paste("lasso_slop",i,sep="")
+      name6[i]=paste("median_slop",i,sep="")
+    }
+    
+    name2se=numeric()
+    name3se=numeric()
+    name4se=numeric()
+    name5se=numeric()
+    name6se=numeric()
+    
+    for(i in 1:d){
+      
+      name2se[i]=paste("cml_slop_se",i,sep="")
+      name3se[i]=paste("egger_slop_se",i,sep="")
+      name4se[i]=paste("ivw_slop_se",i,sep="")
+      name5se[i]=paste("lasso_slop_se",i,sep="")
+      name6se[i]=paste("median_slop_se",i,sep="")
+    }
+    slope=as.data.frame(slope)
+    colnames(slope)=c( name2,name3,name4,name5,name6)
+    slope_se=as.data.frame(slope_se)
+    colnames(slope_se)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    slope_temp=as.data.frame(slope_temp)
+    colnames(slope_temp)=c( name2,name3,name4,name5,name6)
+    slope_se_temp=as.data.frame(slope_se_temp)
+    colnames(slope_se_temp)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    
+    write.table(resultMVMRcML,file=paste("resultMVMRcML",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRLasso,file=paste("resultLasso",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRMedian,file=paste("resultMedian",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRIVW,file=paste("resultMVMRIVW",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMREgger,file=paste("resultEgger",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    
+    slopetotal=list(slope=slope,slope_se=slope_se,slope_temp=slope_temp,slope_se_temp=slope_se_temp)
+    save(slopetotal,file = paste("BMI_M1_second_turn_slope",u,".RData",sep=""))
+    
+  }
+  if(u==8){
+    d=u
+    usecov=1:numcov[u]
+    d=numcov[u]
+    betaGX1= as.matrix(betaGX1total[,usecov])
+    pvaluebetaGX1=as.matrix(pvaluebetaGX1total[,usecov])
+    sdbetaGX1=as.matrix(sdbetaGX1total[,usecov])
+    ZX1=as.matrix(ZX1total[,usecov])
+    betaGYC=betaGYCtotal[,u]
+    pvaluebetaGYC=pvaluebetaGYCtotal[,u]
+    sdbetaGYC=sdbetaGYCtotal[,u]
+    ZYC=ZYCtotal[,u]
+    correlation1=corr_total[[u]][c(1,1+usecov),c(1,1+usecov)]
+    gwas_X=list()
+    for(i1 in 1:numcov[u]){
+      gwas_X[[i1]]=data.frame(rs=ID,beta=betaGX1[,i1],s.d.=sdbetaGX1[,i1],Tstat=ZX1[,i1],p=pvaluebetaGX1[,i1])
+      row.names(gwas_X[[i1]])=ID
+    }
+    gwas_y=data.frame(rs=ID,beta=betaGYC,s.d.=sdbetaGYC,Tstat=ZYC,p=pvaluebetaGYC)
+    row.names(gwas_y)=ID
+    if(numcov[u]==1){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))
+    }
+    if(numcov[u]==2){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+    }
+    
+    if(numcov[u]>=3&numcov[u]<11){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    if(numcov[u]>=11){
+      pvalX=1e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    
+    sum(IV)
+    used=gene1$V3[IV]
+    betaGX_IV=as.matrix(betaGX1[IV,])
+    betaGYC_IV=betaGYC[IV]
+    sdbetaGX_IV=as.matrix(sdbetaGX1[IV,])
+    sdbetaGYC_IV=sdbetaGYC[IV]
+    pvaluebetaGX_IV=as.matrix(pvaluebetaGX1[IV,])
+    pvaluebetaGYC_IV=pvaluebetaGYC[IV ]
+    rs_IV=gene1$V3[IV]
+    
+    SIG=list()
+    for(i in 1:sum(IV)){
+      SIG[[i]]=diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))%*%correlation1%*%diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))
+    }
+    
+    
+    
+    
+    Want=cml_MA(N=Nsample,p=ncol(betaGX1),m=nrow(betaGX_IV),betax=betaGX_IV,betayc=betaGYC_IV,SIG1=SIG,threshold=0.01,maxit=500)
+    
+    b=Want$b
+    covb=Want$Covb
+    if(min(eigen(covb)$values)<0){
+      covb=covb+diag((-1.001)*min(eigen(covb)$values),nrow=d,ncol = d)
+    }
+    valid=Want$validuse
+    betaxvalid=Want$betaxvalid
+    betaxIVvalid=Want$betaxIVvalid
+    used=used[valid]
+    Omega=Want$Omega
+    print("function finish")
+    
+    betaGYadj=numeric()
+    for(i in 1:nsnpstotal){
+      betaGYadj[i]=betaGYC[i]-t(b)%*%betaGX1[i,]
+    }
+    
+    sdbetaGYadj2=numeric()
+    ld=matrix(0,nrow=nsnpstotal,ncol=length(used))
+    row.names(ld)=ID
+    colnames(ld)=used
+    
+    
+    blocks=read.table("fourier_ls_all.bed.txt",header = TRUE)
+    blocks_used=list()
+    chr_used=chr[ID%in%used]
+    for(i in 1:length(used)){
+      blocks_used[[i]]=numeric()
+      blockstemp=blocks[blocks$chr==chr_used[i],]
+      starttemp=blockstemp$start
+      stoptemp=blockstemp$stop
+      snpstemp=ID[chr==chr_used[i]]
+      BP_temp=BP[ID%in%snpstemp]
+      BP_tar=BP[ID==used[i]]
+      for(i1 in 1:length(starttemp)){
+        if(BP_tar>=starttemp[i1]&BP_tar<=stoptemp[i1]){
+          startar=starttemp[i1]
+          stoptar=stoptemp[i1]
+        }
+      }
+      for(i1 in 1:length(snpstemp)){
+        if(BP_temp[i1]>=startar&BP_temp[i1]<=stoptar){
+          blocks_used[[i]]=c(blocks_used[[i]],snpstemp[i1])
+        }
+      }
+      print(i)
+    }
+    
+    ld=list()
+    for(i in 1:length(used)){
+      ld[[i]]=numeric()
+      for(i1 in 1:length(blocks_used[[i]])){
+        ld[[i]][i1]=cor(G[,used[i]],G[,blocks_used[[i]][i1]],use = "pairwise.complete.obs")
+        
+      }
+      names(ld[[i]])=blocks_used[[i]]
+      print(i)
+    }
+    
+    
+    
+    
+    gwas_XIV=list()
+    for(i1 in 1:numcov[u]){
+      gwas_XIV[[i1]]=data.frame(rs=used,beta=betaGX1[,i1][ID%in%used],s.d.=sdbetaGX1[,i1][ID%in%used],Tstat=ZX1[,i1][ID%in%used],p=pvaluebetaGX1[,i1][ID%in%used])
+      row.names(gwas_XIV[[i1]])=used
+    }
+    gwas_yIV=data.frame(rs=used,beta=betaGYC[ID%in%used],s.d.=sdbetaGYC[ID%in%used],Tstat=ZYC[ID%in%used],p=pvaluebetaGYC[ID%in%used])
+    row.names(gwas_yIV)=used
+    
+    
+    niv=length(used)
+    
+    varbeta3=foreach(i=1:nsnpstotal,.combine = "c")%dopar%{
+      library(Matrix)
+      ldi=rep(0,times=niv)
+      for(i1 in 1:niv){
+        if(ID[i]%in%names(ld[[i1]])){
+          ldi[i1]=ld[[i1]][ID[i]]
+        }
+      }
+      rs=0
+      beta=0
+      s.d.=0
+      Tstat=0
+      p=0
+      GX=data.frame(rs,beta,s.d.,Tstat,p)
+      GY=GX
+      ZY=GX
+      ZX=list()
+      for(i1 in 1:length(used)){
+        ZX[[i1]]=GX
+        for(i2 in 1:d){
+          ZX[[i1]][i2,]=gwas_XIV[[i2]][used[i1],]
+        }
+        ZY[i1,]=gwas_yIV[used[i1],]
+      }
+      
+      for(i1 in 1:d){
+        GX[i1,]=gwas_X[[i1]][i,]
+      }
+      GY[1,]=gwas_y[i,]
+      sigmaG=diag(c(GY$s.d.,GX$s.d.))%*%correlation1%*%diag(c(GY$s.d.,GX$s.d.))
+      sigmaGZY=list()
+      for(i1 in 1:niv){
+        sigmaGZY[[i1]]=matrix(ldi[i1]*c(GY$s.d.,GX$s.d.)*ZY$s.d.[i1]*correlation1[1,],nrow=d+1,ncol=1)
+      }
+      sigmaGZH=list()
+      for(i1 in 1:niv){
+        sigmaGZH[[i1]]=matrix(0,nrow=d+1,ncol=d)
+        for(i2 in 1:d+1){
+          if(i2==1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GY$s.d.*ZX[[i1]]$s.d.*correlation1[1,(2:(d+1))]
+          }
+          if(i2>1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GX$s.d.[i2-1]*ZX[[i1]]$s.d.*correlation1[i2,(2:(d+1))]
+          }
+        }
+      }
+      sigmaZ=bdiag(SIG[valid])
+      for(i1 in 1:length(used)){
+        if(i1==1){
+          sigma12=cbind(sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+        if(i1>1){
+          sigma12=cbind(sigma12,sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+      }
+      SIGMA1=cbind(sigmaG,sigma12)
+      SIGMA2=cbind(t(sigma12),sigmaZ)
+      SIGMA=rbind(SIGMA1,SIGMA2)
+      U1=bdiag(diag(1,nrow=d+1,ncol=d+1),Omega)%*%SIGMA%*%t(bdiag(diag(1,nrow=d+1,ncol=d+1),Omega))
+      v=c(1,-b,-GX$beta)
+      if(min(eigen(U1)$values)<0){
+        U1=U1+(-min(eigen(U1)$values))*1.001*diag(1,nrow=nrow(U1),ncol=ncol(U1))
+      }
+      out=as.numeric(t(v)%*%U1%*%v)
+    }
+    sdbetaGYadj=sqrt(varbeta3)
+    
+    
+    for(i in 1:nsnpstotal){
+      a=sdbetaGYC[i]^2
+      b1=t(betaGX1[i,])%*%covb%*%betaGX1[i,]
+      c=sum(b^2*as.vector(sdbetaGX1[i,]^2))
+      d=sum(diag(covb)*sdbetaGX1[i,]^2)
+      sdbetaGYadj2[i]=sqrt(a+b1+c+d)
+    }
+    
+    z=abs(betaGYadj/sdbetaGYadj)
+    pvalueadj=(1-pnorm(z))*2
+    z2=abs(betaGYadj/sdbetaGYadj2)
+    pvalueadj2=(1-pnorm(z2))*2
+    resultMVMRcML=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj,sd_adj=sdbetaGYadj,p_adj=pvalueadj,sd_adj2=sdbetaGYadj2,p_adj2=pvalueadj2)
+    
+    
+    library(MendelianRandomization)
+    del=which(rs_IV%in%used==FALSE)
+    d=u
+    DP=200
+    bDP_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_median=matrix(0,nrow=DP,ncol=d)
+    betaGX_IV2=betaGX_IV
+    betaGYC_IV2=betaGYC_IV
+    sdbetaGX_IV2=sdbetaGX_IV
+    sdbetaGYC_IV2=sdbetaGYC_IV
+    SIG2=SIG
+    pvaluebetaGX_IV2=pvaluebetaGX_IV 
+    pvaluebetaGYC_IV2=pvaluebetaGYC_IV
+    if(length(del)>0){
+      betaGX_IV2=as.matrix(betaGX_IV2[-del,])
+      betaGYC_IV2=betaGYC_IV[-del ]
+      sdbetaGX_IV2=as.matrix(sdbetaGX_IV[-del,])
+      sdbetaGYC_IV2=sdbetaGYC_IV[-del ]
+      SIG2=SIG[-del ]
+      pvaluebetaGX_IV2=as.matrix(pvaluebetaGX_IV[-del,]) 
+      pvaluebetaGYC_IV2=pvaluebetaGYC_IV[-del ]
+    }
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV2 ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV2 )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV2 )[i],(betaGX_IV2 )[i,]),Sigma = (SIG2 )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV2 ,by=betaY,byse =sdbetaGYC_IV2 )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_egger[j,]=egger$Estimate
+      bDP_ivw[j,]=ivw$Estimate
+      bDP_lasso[j,]=lasso$Estimate
+      bDP_median[j,]=median1$Estimate
+      
+    }
+    b_egger=colMeans(bDP_egger)
+    covb_egger=cov(bDP_egger)
+    b_ivw=colMeans(bDP_ivw)
+    covb_ivw=cov(bDP_ivw)
+    b_lasso=colMeans(bDP_lasso)
+    covb_lasso=cov(bDP_lasso) 
+    b_median=colMeans(bDP_median)
+    covb_median=cov(bDP_median) 
+    
+    
+    
+    bDP_temp_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_median=matrix(0,nrow=DP,ncol=d)
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV )[i],(betaGX_IV )[i,]),Sigma = (SIG )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV ,by=betaY,byse =sdbetaGYC_IV )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_temp_egger[j,]=egger$Estimate
+      bDP_temp_ivw[j,]=ivw$Estimate
+      bDP_temp_lasso[j,]=lasso$Estimate
+      bDP_temp_median[j,]=median1$Estimate
+      
+    }
+    b_temp_egger=colMeans(bDP_temp_egger)
+    covb_temp_egger=cov(bDP_temp_egger)
+    b_temp_ivw=colMeans(bDP_temp_ivw)
+    covb_temp_ivw=cov(bDP_temp_ivw)
+    b_temp_lasso=colMeans(bDP_temp_lasso)
+    covb_temp_lasso=cov(bDP_temp_lasso) 
+    b_temp_median=colMeans(bDP_temp_median)
+    covb_temp_median=cov(bDP_temp_median) 
+    
+    
+    
+    betaGYadj_egger=numeric()
+    betaGYadj_lasso=numeric()
+    betaGYadj_median=numeric()
+    betaGYadj_ivw=numeric()
+    varbetaGYadj_egger1=numeric()
+    varbetaGYadj_lasso1=numeric()
+    varbetaGYadj_median1=numeric()
+    varbetaGYadj_ivw1=numeric()
+    varbetaGYadj_egger2=numeric()
+    varbetaGYadj_lasso2=numeric()
+    varbetaGYadj_median2=numeric()
+    varbetaGYadj_ivw2=numeric()
+    
+    
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
+      covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
+      covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
+      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
+      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
+      varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
+      varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
+      varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
+      varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
+    }
+    
+    SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
+    
+    SDbetaGYadj_egger2=sqrt(varbetaGYadj_egger2) 
+    
+    
+    
+    z_egger1=abs(betaGYadj_egger/SDbetaGYadj_egger1)
+    
+    z_egger2=abs(betaGYadj_egger/SDbetaGYadj_egger2)
+    
+    
+    
+    pvalueadj_egger1=(1-pnorm(z_egger1))*2
+    
+    pvalueadj_egger2=(1-pnorm(z_egger2))*2
+    
+    
+    SDbetaGYadj_ivw1=sqrt(varbetaGYadj_ivw1) 
+    SDbetaGYadj_lasso1=sqrt(varbetaGYadj_lasso1)
+    SDbetaGYadj_median1=sqrt(varbetaGYadj_median1)
+    SDbetaGYadj_ivw2=sqrt(varbetaGYadj_ivw2) 
+    SDbetaGYadj_lasso2=sqrt(varbetaGYadj_lasso2)
+    SDbetaGYadj_median2=sqrt(varbetaGYadj_median2)
+    
+    
+    
+    z_ivw1=abs(betaGYadj_ivw/SDbetaGYadj_ivw1)
+    z_median1=abs(betaGYadj_median/SDbetaGYadj_median1)
+    z_lasso1=abs(betaGYadj_lasso/SDbetaGYadj_lasso1)
+    z_ivw2=abs(betaGYadj_ivw/SDbetaGYadj_ivw2)
+    z_median2=abs(betaGYadj_median/SDbetaGYadj_median2)
+    z_lasso2=abs(betaGYadj_lasso/SDbetaGYadj_lasso2)
+    
+    
+    
+    pvalueadj_ivw1=(1-pnorm(z_ivw1))*2
+    pvalueadj_median1=(1-pnorm(z_median1))*2
+    pvalueadj_lasso1=(1-pnorm(z_lasso1))*2
+    pvalueadj_ivw2=(1-pnorm(z_ivw2))*2
+    pvalueadj_median2=(1-pnorm(z_median2))*2
+    pvalueadj_lasso2=(1-pnorm(z_lasso2))*2
+    resultMVMREgger=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_egger,sd_adj=SDbetaGYadj_egger1,p_adj=pvalueadj_egger1,sd_adj2=SDbetaGYadj_egger2,p_adj2=pvalueadj_egger2)
+    resultMVMRLasso=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_lasso,sd_adj=SDbetaGYadj_lasso1,p_adj=pvalueadj_lasso1,sd_adj2=SDbetaGYadj_lasso2,p_adj2=pvalueadj_lasso2)
+    resultMVMRMedian=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_median,sd_adj=SDbetaGYadj_median1,p_adj=pvalueadj_median1,sd_adj2=SDbetaGYadj_median2,p_adj2=pvalueadj_median2)
+    resultMVMRIVW=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_ivw,sd_adj=SDbetaGYadj_ivw1,p_adj=pvalueadj_ivw1,sd_adj2=SDbetaGYadj_ivw2,p_adj2=pvalueadj_ivw2)
+    
+    slope=matrix(0,ncol=5*d,nrow=1)
+    slope_se=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope[i,]=c( b,b_egger,b_ivw,b_lasso,b_median)
+      slope_se[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_egger)),sqrt(diag(covb_ivw)),sqrt(diag(covb_lasso)),sqrt(diag(covb_median)))
+    }
+    
+    slope_temp=matrix(0,ncol=5*d,nrow=1)
+    slope_se_temp=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope_temp[i,]=c( b,b_temp_egger,b_temp_ivw,b_temp_lasso,b_temp_median)
+      slope_se_temp[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_temp_egger)),sqrt(diag(covb_temp_ivw)),sqrt(diag(covb_temp_lasso)),sqrt(diag(covb_temp_median)))
+    }
+    
+    
+    name2=numeric()
+    name3=numeric()
+    name4=numeric()
+    name5=numeric()
+    name6=numeric()
+    
+    for(i in 1:d){
+      
+      name2[i]=paste("cml_slop",i,sep="")
+      name3[i]=paste("egger_slop",i,sep="")
+      name4[i]=paste("ivw_slop",i,sep="")
+      name5[i]=paste("lasso_slop",i,sep="")
+      name6[i]=paste("median_slop",i,sep="")
+    }
+    
+    name2se=numeric()
+    name3se=numeric()
+    name4se=numeric()
+    name5se=numeric()
+    name6se=numeric()
+    
+    for(i in 1:d){
+      
+      name2se[i]=paste("cml_slop_se",i,sep="")
+      name3se[i]=paste("egger_slop_se",i,sep="")
+      name4se[i]=paste("ivw_slop_se",i,sep="")
+      name5se[i]=paste("lasso_slop_se",i,sep="")
+      name6se[i]=paste("median_slop_se",i,sep="")
+    }
+    slope=as.data.frame(slope)
+    colnames(slope)=c( name2,name3,name4,name5,name6)
+    slope_se=as.data.frame(slope_se)
+    colnames(slope_se)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    slope_temp=as.data.frame(slope_temp)
+    colnames(slope_temp)=c( name2,name3,name4,name5,name6)
+    slope_se_temp=as.data.frame(slope_se_temp)
+    colnames(slope_se_temp)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    
+    write.table(resultMVMRcML,file=paste("resultMVMRcML",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRLasso,file=paste("resultLasso",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRMedian,file=paste("resultMedian",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRIVW,file=paste("resultMVMRIVW",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMREgger,file=paste("resultEgger",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    
+    slopetotal=list(slope=slope,slope_se=slope_se,slope_temp=slope_temp,slope_se_temp=slope_se_temp)
+    save(slopetotal,file = paste("BMI_M1_second_turn_slope",u,".RData",sep=""))
+    
+  }
+  if(u==9){
+    d=u
+    usecov=1:numcov[u]
+    d=numcov[u]
+    betaGX1= as.matrix(betaGX1total[,usecov])
+    pvaluebetaGX1=as.matrix(pvaluebetaGX1total[,usecov])
+    sdbetaGX1=as.matrix(sdbetaGX1total[,usecov])
+    ZX1=as.matrix(ZX1total[,usecov])
+    betaGYC=betaGYCtotal[,u]
+    pvaluebetaGYC=pvaluebetaGYCtotal[,u]
+    sdbetaGYC=sdbetaGYCtotal[,u]
+    ZYC=ZYCtotal[,u]
+    correlation1=corr_total[[u]][c(1,1+usecov),c(1,1+usecov)]
+    gwas_X=list()
+    for(i1 in 1:numcov[u]){
+      gwas_X[[i1]]=data.frame(rs=ID,beta=betaGX1[,i1],s.d.=sdbetaGX1[,i1],Tstat=ZX1[,i1],p=pvaluebetaGX1[,i1])
+      row.names(gwas_X[[i1]])=ID
+    }
+    gwas_y=data.frame(rs=ID,beta=betaGYC,s.d.=sdbetaGYC,Tstat=ZYC,p=pvaluebetaGYC)
+    row.names(gwas_y)=ID
+    if(numcov[u]==1){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))
+    }
+    if(numcov[u]==2){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+    }
+    
+    if(numcov[u]>=3&numcov[u]<11){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    if(numcov[u]>=11){
+      pvalX=1e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    
+    sum(IV)
+    used=gene1$V3[IV]
+    betaGX_IV=as.matrix(betaGX1[IV,])
+    betaGYC_IV=betaGYC[IV]
+    sdbetaGX_IV=as.matrix(sdbetaGX1[IV,])
+    sdbetaGYC_IV=sdbetaGYC[IV]
+    pvaluebetaGX_IV=as.matrix(pvaluebetaGX1[IV,])
+    pvaluebetaGYC_IV=pvaluebetaGYC[IV ]
+    rs_IV=gene1$V3[IV]
+    
+    SIG=list()
+    for(i in 1:sum(IV)){
+      SIG[[i]]=diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))%*%correlation1%*%diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))
+    }
+    
+    
+    
+    
+    Want=cml_MA(N=Nsample,p=ncol(betaGX1),m=nrow(betaGX_IV),betax=betaGX_IV,betayc=betaGYC_IV,SIG1=SIG,threshold=0.01,maxit=500)
+    
+    b=Want$b
+    covb=Want$Covb
+    if(min(eigen(covb)$values)<0){
+      covb=covb+diag((-1.001)*min(eigen(covb)$values),nrow=d,ncol = d)
+    }
+    valid=Want$validuse
+    betaxvalid=Want$betaxvalid
+    betaxIVvalid=Want$betaxIVvalid
+    used=used[valid]
+    Omega=Want$Omega
+    print("function finish")
+    
+    betaGYadj=numeric()
+    for(i in 1:nsnpstotal){
+      betaGYadj[i]=betaGYC[i]-t(b)%*%betaGX1[i,]
+    }
+    
+    sdbetaGYadj2=numeric()
+    ld=matrix(0,nrow=nsnpstotal,ncol=length(used))
+    row.names(ld)=ID
+    colnames(ld)=used
+    
+    
+    blocks=read.table("fourier_ls_all.bed.txt",header = TRUE)
+    blocks_used=list()
+    chr_used=chr[ID%in%used]
+    for(i in 1:length(used)){
+      blocks_used[[i]]=numeric()
+      blockstemp=blocks[blocks$chr==chr_used[i],]
+      starttemp=blockstemp$start
+      stoptemp=blockstemp$stop
+      snpstemp=ID[chr==chr_used[i]]
+      BP_temp=BP[ID%in%snpstemp]
+      BP_tar=BP[ID==used[i]]
+      for(i1 in 1:length(starttemp)){
+        if(BP_tar>=starttemp[i1]&BP_tar<=stoptemp[i1]){
+          startar=starttemp[i1]
+          stoptar=stoptemp[i1]
+        }
+      }
+      for(i1 in 1:length(snpstemp)){
+        if(BP_temp[i1]>=startar&BP_temp[i1]<=stoptar){
+          blocks_used[[i]]=c(blocks_used[[i]],snpstemp[i1])
+        }
+      }
+      print(i)
+    }
+    
+    ld=list()
+    for(i in 1:length(used)){
+      ld[[i]]=numeric()
+      for(i1 in 1:length(blocks_used[[i]])){
+        ld[[i]][i1]=cor(G[,used[i]],G[,blocks_used[[i]][i1]],use = "pairwise.complete.obs")
+        
+      }
+      names(ld[[i]])=blocks_used[[i]]
+      print(i)
+    }
+    
+    
+    
+    
+    gwas_XIV=list()
+    for(i1 in 1:numcov[u]){
+      gwas_XIV[[i1]]=data.frame(rs=used,beta=betaGX1[,i1][ID%in%used],s.d.=sdbetaGX1[,i1][ID%in%used],Tstat=ZX1[,i1][ID%in%used],p=pvaluebetaGX1[,i1][ID%in%used])
+      row.names(gwas_XIV[[i1]])=used
+    }
+    gwas_yIV=data.frame(rs=used,beta=betaGYC[ID%in%used],s.d.=sdbetaGYC[ID%in%used],Tstat=ZYC[ID%in%used],p=pvaluebetaGYC[ID%in%used])
+    row.names(gwas_yIV)=used
+    
+    
+    niv=length(used)
+    
+    varbeta3=foreach(i=1:nsnpstotal,.combine = "c")%dopar%{
+      library(Matrix)
+      ldi=rep(0,times=niv)
+      for(i1 in 1:niv){
+        if(ID[i]%in%names(ld[[i1]])){
+          ldi[i1]=ld[[i1]][ID[i]]
+        }
+      }
+      rs=0
+      beta=0
+      s.d.=0
+      Tstat=0
+      p=0
+      GX=data.frame(rs,beta,s.d.,Tstat,p)
+      GY=GX
+      ZY=GX
+      ZX=list()
+      for(i1 in 1:length(used)){
+        ZX[[i1]]=GX
+        for(i2 in 1:d){
+          ZX[[i1]][i2,]=gwas_XIV[[i2]][used[i1],]
+        }
+        ZY[i1,]=gwas_yIV[used[i1],]
+      }
+      
+      for(i1 in 1:d){
+        GX[i1,]=gwas_X[[i1]][i,]
+      }
+      GY[1,]=gwas_y[i,]
+      sigmaG=diag(c(GY$s.d.,GX$s.d.))%*%correlation1%*%diag(c(GY$s.d.,GX$s.d.))
+      sigmaGZY=list()
+      for(i1 in 1:niv){
+        sigmaGZY[[i1]]=matrix(ldi[i1]*c(GY$s.d.,GX$s.d.)*ZY$s.d.[i1]*correlation1[1,],nrow=d+1,ncol=1)
+      }
+      sigmaGZH=list()
+      for(i1 in 1:niv){
+        sigmaGZH[[i1]]=matrix(0,nrow=d+1,ncol=d)
+        for(i2 in 1:d+1){
+          if(i2==1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GY$s.d.*ZX[[i1]]$s.d.*correlation1[1,(2:(d+1))]
+          }
+          if(i2>1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GX$s.d.[i2-1]*ZX[[i1]]$s.d.*correlation1[i2,(2:(d+1))]
+          }
+        }
+      }
+      sigmaZ=bdiag(SIG[valid])
+      for(i1 in 1:length(used)){
+        if(i1==1){
+          sigma12=cbind(sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+        if(i1>1){
+          sigma12=cbind(sigma12,sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+      }
+      SIGMA1=cbind(sigmaG,sigma12)
+      SIGMA2=cbind(t(sigma12),sigmaZ)
+      SIGMA=rbind(SIGMA1,SIGMA2)
+      U1=bdiag(diag(1,nrow=d+1,ncol=d+1),Omega)%*%SIGMA%*%t(bdiag(diag(1,nrow=d+1,ncol=d+1),Omega))
+      v=c(1,-b,-GX$beta)
+      if(min(eigen(U1)$values)<0){
+        U1=U1+(-min(eigen(U1)$values))*1.001*diag(1,nrow=nrow(U1),ncol=ncol(U1))
+      }
+      out=as.numeric(t(v)%*%U1%*%v)
+    }
+    sdbetaGYadj=sqrt(varbeta3)
+    
+    
+    for(i in 1:nsnpstotal){
+      a=sdbetaGYC[i]^2
+      b1=t(betaGX1[i,])%*%covb%*%betaGX1[i,]
+      c=sum(b^2*as.vector(sdbetaGX1[i,]^2))
+      d=sum(diag(covb)*sdbetaGX1[i,]^2)
+      sdbetaGYadj2[i]=sqrt(a+b1+c+d)
+    }
+    
+    z=abs(betaGYadj/sdbetaGYadj)
+    pvalueadj=(1-pnorm(z))*2
+    z2=abs(betaGYadj/sdbetaGYadj2)
+    pvalueadj2=(1-pnorm(z2))*2
+    resultMVMRcML=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj,sd_adj=sdbetaGYadj,p_adj=pvalueadj,sd_adj2=sdbetaGYadj2,p_adj2=pvalueadj2)
+    
+    
+    library(MendelianRandomization)
+    del=which(rs_IV%in%used==FALSE)
+    d=u
+    DP=200
+    bDP_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_median=matrix(0,nrow=DP,ncol=d)
+    betaGX_IV2=betaGX_IV
+    betaGYC_IV2=betaGYC_IV
+    sdbetaGX_IV2=sdbetaGX_IV
+    sdbetaGYC_IV2=sdbetaGYC_IV
+    SIG2=SIG
+    pvaluebetaGX_IV2=pvaluebetaGX_IV 
+    pvaluebetaGYC_IV2=pvaluebetaGYC_IV
+    if(length(del)>0){
+      betaGX_IV2=as.matrix(betaGX_IV2[-del,])
+      betaGYC_IV2=betaGYC_IV[-del ]
+      sdbetaGX_IV2=as.matrix(sdbetaGX_IV[-del,])
+      sdbetaGYC_IV2=sdbetaGYC_IV[-del ]
+      SIG2=SIG[-del ]
+      pvaluebetaGX_IV2=as.matrix(pvaluebetaGX_IV[-del,]) 
+      pvaluebetaGYC_IV2=pvaluebetaGYC_IV[-del ]
+    }
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV2 ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV2 )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV2 )[i],(betaGX_IV2 )[i,]),Sigma = (SIG2 )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV2 ,by=betaY,byse =sdbetaGYC_IV2 )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_egger[j,]=egger$Estimate
+      bDP_ivw[j,]=ivw$Estimate
+      bDP_lasso[j,]=lasso$Estimate
+      bDP_median[j,]=median1$Estimate
+      
+    }
+    b_egger=colMeans(bDP_egger)
+    covb_egger=cov(bDP_egger)
+    b_ivw=colMeans(bDP_ivw)
+    covb_ivw=cov(bDP_ivw)
+    b_lasso=colMeans(bDP_lasso)
+    covb_lasso=cov(bDP_lasso) 
+    b_median=colMeans(bDP_median)
+    covb_median=cov(bDP_median) 
+    
+    
+    
+    bDP_temp_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_median=matrix(0,nrow=DP,ncol=d)
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV )[i],(betaGX_IV )[i,]),Sigma = (SIG )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV ,by=betaY,byse =sdbetaGYC_IV )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_temp_egger[j,]=egger$Estimate
+      bDP_temp_ivw[j,]=ivw$Estimate
+      bDP_temp_lasso[j,]=lasso$Estimate
+      bDP_temp_median[j,]=median1$Estimate
+      
+    }
+    b_temp_egger=colMeans(bDP_temp_egger)
+    covb_temp_egger=cov(bDP_temp_egger)
+    b_temp_ivw=colMeans(bDP_temp_ivw)
+    covb_temp_ivw=cov(bDP_temp_ivw)
+    b_temp_lasso=colMeans(bDP_temp_lasso)
+    covb_temp_lasso=cov(bDP_temp_lasso) 
+    b_temp_median=colMeans(bDP_temp_median)
+    covb_temp_median=cov(bDP_temp_median) 
+    
+    
+    
+    betaGYadj_egger=numeric()
+    betaGYadj_lasso=numeric()
+    betaGYadj_median=numeric()
+    betaGYadj_ivw=numeric()
+    varbetaGYadj_egger1=numeric()
+    varbetaGYadj_lasso1=numeric()
+    varbetaGYadj_median1=numeric()
+    varbetaGYadj_ivw1=numeric()
+    varbetaGYadj_egger2=numeric()
+    varbetaGYadj_lasso2=numeric()
+    varbetaGYadj_median2=numeric()
+    varbetaGYadj_ivw2=numeric()
+    
+    
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
+      covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
+      covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
+      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
+      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
+      varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
+      varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
+      varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
+      varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
+    }
+    
+    SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
+    
+    SDbetaGYadj_egger2=sqrt(varbetaGYadj_egger2) 
+    
+    
+    
+    z_egger1=abs(betaGYadj_egger/SDbetaGYadj_egger1)
+    
+    z_egger2=abs(betaGYadj_egger/SDbetaGYadj_egger2)
+    
+    
+    
+    pvalueadj_egger1=(1-pnorm(z_egger1))*2
+    
+    pvalueadj_egger2=(1-pnorm(z_egger2))*2
+    
+    
+    SDbetaGYadj_ivw1=sqrt(varbetaGYadj_ivw1) 
+    SDbetaGYadj_lasso1=sqrt(varbetaGYadj_lasso1)
+    SDbetaGYadj_median1=sqrt(varbetaGYadj_median1)
+    SDbetaGYadj_ivw2=sqrt(varbetaGYadj_ivw2) 
+    SDbetaGYadj_lasso2=sqrt(varbetaGYadj_lasso2)
+    SDbetaGYadj_median2=sqrt(varbetaGYadj_median2)
+    
+    
+    
+    z_ivw1=abs(betaGYadj_ivw/SDbetaGYadj_ivw1)
+    z_median1=abs(betaGYadj_median/SDbetaGYadj_median1)
+    z_lasso1=abs(betaGYadj_lasso/SDbetaGYadj_lasso1)
+    z_ivw2=abs(betaGYadj_ivw/SDbetaGYadj_ivw2)
+    z_median2=abs(betaGYadj_median/SDbetaGYadj_median2)
+    z_lasso2=abs(betaGYadj_lasso/SDbetaGYadj_lasso2)
+    
+    
+    
+    pvalueadj_ivw1=(1-pnorm(z_ivw1))*2
+    pvalueadj_median1=(1-pnorm(z_median1))*2
+    pvalueadj_lasso1=(1-pnorm(z_lasso1))*2
+    pvalueadj_ivw2=(1-pnorm(z_ivw2))*2
+    pvalueadj_median2=(1-pnorm(z_median2))*2
+    pvalueadj_lasso2=(1-pnorm(z_lasso2))*2
+    resultMVMREgger=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_egger,sd_adj=SDbetaGYadj_egger1,p_adj=pvalueadj_egger1,sd_adj2=SDbetaGYadj_egger2,p_adj2=pvalueadj_egger2)
+    resultMVMRLasso=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_lasso,sd_adj=SDbetaGYadj_lasso1,p_adj=pvalueadj_lasso1,sd_adj2=SDbetaGYadj_lasso2,p_adj2=pvalueadj_lasso2)
+    resultMVMRMedian=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_median,sd_adj=SDbetaGYadj_median1,p_adj=pvalueadj_median1,sd_adj2=SDbetaGYadj_median2,p_adj2=pvalueadj_median2)
+    resultMVMRIVW=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj_ivw,sd_adj=SDbetaGYadj_ivw1,p_adj=pvalueadj_ivw1,sd_adj2=SDbetaGYadj_ivw2,p_adj2=pvalueadj_ivw2)
+    
+    slope=matrix(0,ncol=5*d,nrow=1)
+    slope_se=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope[i,]=c( b,b_egger,b_ivw,b_lasso,b_median)
+      slope_se[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_egger)),sqrt(diag(covb_ivw)),sqrt(diag(covb_lasso)),sqrt(diag(covb_median)))
+    }
+    
+    slope_temp=matrix(0,ncol=5*d,nrow=1)
+    slope_se_temp=matrix(0,ncol=5*d,nrow=1)
+    for(i in 1:nrow(slope)){
+      slope_temp[i,]=c( b,b_temp_egger,b_temp_ivw,b_temp_lasso,b_temp_median)
+      slope_se_temp[i,]=c( sqrt(diag(covb)),sqrt(diag(covb_temp_egger)),sqrt(diag(covb_temp_ivw)),sqrt(diag(covb_temp_lasso)),sqrt(diag(covb_temp_median)))
+    }
+    
+    
+    name2=numeric()
+    name3=numeric()
+    name4=numeric()
+    name5=numeric()
+    name6=numeric()
+    
+    for(i in 1:d){
+      
+      name2[i]=paste("cml_slop",i,sep="")
+      name3[i]=paste("egger_slop",i,sep="")
+      name4[i]=paste("ivw_slop",i,sep="")
+      name5[i]=paste("lasso_slop",i,sep="")
+      name6[i]=paste("median_slop",i,sep="")
+    }
+    
+    name2se=numeric()
+    name3se=numeric()
+    name4se=numeric()
+    name5se=numeric()
+    name6se=numeric()
+    
+    for(i in 1:d){
+      
+      name2se[i]=paste("cml_slop_se",i,sep="")
+      name3se[i]=paste("egger_slop_se",i,sep="")
+      name4se[i]=paste("ivw_slop_se",i,sep="")
+      name5se[i]=paste("lasso_slop_se",i,sep="")
+      name6se[i]=paste("median_slop_se",i,sep="")
+    }
+    slope=as.data.frame(slope)
+    colnames(slope)=c( name2,name3,name4,name5,name6)
+    slope_se=as.data.frame(slope_se)
+    colnames(slope_se)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    slope_temp=as.data.frame(slope_temp)
+    colnames(slope_temp)=c( name2,name3,name4,name5,name6)
+    slope_se_temp=as.data.frame(slope_se_temp)
+    colnames(slope_se_temp)=c( name2se,name3se,name4se,name5se,name6se)
+    
+    
+    write.table(resultMVMRcML,file=paste("resultMVMRcML",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRLasso,file=paste("resultLasso",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRMedian,file=paste("resultMedian",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMRIVW,file=paste("resultMVMRIVW",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    write.table(resultMVMREgger,file=paste("resultEgger",u,".txt",sep=""),sep="\t",col.names = TRUE,row.names = FALSE,quote = FALSE)
+    
+    slopetotal=list(slope=slope,slope_se=slope_se,slope_temp=slope_temp,slope_se_temp=slope_se_temp)
+    save(slopetotal,file = paste("BMI_M1_second_turn_slope",u,".RData",sep=""))
+    
+  }
+  if(u==10){
+    d=u
+    usecov=1:numcov[u]
+    d=numcov[u]
+    betaGX1= as.matrix(betaGX1total[,usecov])
+    pvaluebetaGX1=as.matrix(pvaluebetaGX1total[,usecov])
+    sdbetaGX1=as.matrix(sdbetaGX1total[,usecov])
+    ZX1=as.matrix(ZX1total[,usecov])
+    betaGYC=betaGYCtotal[,u]
+    pvaluebetaGYC=pvaluebetaGYCtotal[,u]
+    sdbetaGYC=sdbetaGYCtotal[,u]
+    ZYC=ZYCtotal[,u]
+    correlation1=corr_total[[u]][c(1,1+usecov),c(1,1+usecov)]
+    gwas_X=list()
+    for(i1 in 1:numcov[u]){
+      gwas_X[[i1]]=data.frame(rs=ID,beta=betaGX1[,i1],s.d.=sdbetaGX1[,i1],Tstat=ZX1[,i1],p=pvaluebetaGX1[,i1])
+      row.names(gwas_X[[i1]])=ID
+    }
+    gwas_y=data.frame(rs=ID,beta=betaGYC,s.d.=sdbetaGYC,Tstat=ZYC,p=pvaluebetaGYC)
+    row.names(gwas_y)=ID
+    if(numcov[u]==1){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))
+    }
+    if(numcov[u]==2){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+    }
+    
+    if(numcov[u]>=3&numcov[u]<11){
+      pvalX=5e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    if(numcov[u]>=11){
+      pvalX=1e-10
+      IV=(pvaluebetaGX1[,1]<pvalX&(ID %in% IVID))|(pvaluebetaGX1[,2]<pvalX&(ID %in% IVID))
+      for(i in 3:ncol(pvaluebetaGX1)){
+        IV=IV|(pvaluebetaGX1[,i]<pvalX&(ID %in% IVID))
+      }
+    }
+    
+    
+    sum(IV)
+    used=gene1$V3[IV]
+    betaGX_IV=as.matrix(betaGX1[IV,])
+    betaGYC_IV=betaGYC[IV]
+    sdbetaGX_IV=as.matrix(sdbetaGX1[IV,])
+    sdbetaGYC_IV=sdbetaGYC[IV]
+    pvaluebetaGX_IV=as.matrix(pvaluebetaGX1[IV,])
+    pvaluebetaGYC_IV=pvaluebetaGYC[IV ]
+    rs_IV=gene1$V3[IV]
+    
+    SIG=list()
+    for(i in 1:sum(IV)){
+      SIG[[i]]=diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))%*%correlation1%*%diag(c(sdbetaGYC_IV[i],sdbetaGX_IV[i,]))
+    }
+    
+    
+    
+    
+    Want=cml_MA(N=Nsample,p=ncol(betaGX1),m=nrow(betaGX_IV),betax=betaGX_IV,betayc=betaGYC_IV,SIG1=SIG,threshold=0.01,maxit=500)
+    
+    b=Want$b
+    covb=Want$Covb
+    if(min(eigen(covb)$values)<0){
+      covb=covb+diag((-1.001)*min(eigen(covb)$values),nrow=d,ncol = d)
+    }
+    valid=Want$validuse
+    betaxvalid=Want$betaxvalid
+    betaxIVvalid=Want$betaxIVvalid
+    used=used[valid]
+    Omega=Want$Omega
+    print("function finish")
+    
+    betaGYadj=numeric()
+    for(i in 1:nsnpstotal){
+      betaGYadj[i]=betaGYC[i]-t(b)%*%betaGX1[i,]
+    }
+    
+    sdbetaGYadj2=numeric()
+    ld=matrix(0,nrow=nsnpstotal,ncol=length(used))
+    row.names(ld)=ID
+    colnames(ld)=used
+    
+    
+    blocks=read.table("fourier_ls_all.bed.txt",header = TRUE)
+    blocks_used=list()
+    chr_used=chr[ID%in%used]
+    for(i in 1:length(used)){
+      blocks_used[[i]]=numeric()
+      blockstemp=blocks[blocks$chr==chr_used[i],]
+      starttemp=blockstemp$start
+      stoptemp=blockstemp$stop
+      snpstemp=ID[chr==chr_used[i]]
+      BP_temp=BP[ID%in%snpstemp]
+      BP_tar=BP[ID==used[i]]
+      for(i1 in 1:length(starttemp)){
+        if(BP_tar>=starttemp[i1]&BP_tar<=stoptemp[i1]){
+          startar=starttemp[i1]
+          stoptar=stoptemp[i1]
+        }
+      }
+      for(i1 in 1:length(snpstemp)){
+        if(BP_temp[i1]>=startar&BP_temp[i1]<=stoptar){
+          blocks_used[[i]]=c(blocks_used[[i]],snpstemp[i1])
+        }
+      }
+      print(i)
+    }
+    
+    ld=list()
+    for(i in 1:length(used)){
+      ld[[i]]=numeric()
+      for(i1 in 1:length(blocks_used[[i]])){
+        ld[[i]][i1]=cor(G[,used[i]],G[,blocks_used[[i]][i1]],use = "pairwise.complete.obs")
+        
+      }
+      names(ld[[i]])=blocks_used[[i]]
+      print(i)
+    }
+    
+    
+    
+    
+    gwas_XIV=list()
+    for(i1 in 1:numcov[u]){
+      gwas_XIV[[i1]]=data.frame(rs=used,beta=betaGX1[,i1][ID%in%used],s.d.=sdbetaGX1[,i1][ID%in%used],Tstat=ZX1[,i1][ID%in%used],p=pvaluebetaGX1[,i1][ID%in%used])
+      row.names(gwas_XIV[[i1]])=used
+    }
+    gwas_yIV=data.frame(rs=used,beta=betaGYC[ID%in%used],s.d.=sdbetaGYC[ID%in%used],Tstat=ZYC[ID%in%used],p=pvaluebetaGYC[ID%in%used])
+    row.names(gwas_yIV)=used
+    
+    
+    niv=length(used)
+    
+    varbeta3=foreach(i=1:nsnpstotal,.combine = "c")%dopar%{
+      library(Matrix)
+      ldi=rep(0,times=niv)
+      for(i1 in 1:niv){
+        if(ID[i]%in%names(ld[[i1]])){
+          ldi[i1]=ld[[i1]][ID[i]]
+        }
+      }
+      rs=0
+      beta=0
+      s.d.=0
+      Tstat=0
+      p=0
+      GX=data.frame(rs,beta,s.d.,Tstat,p)
+      GY=GX
+      ZY=GX
+      ZX=list()
+      for(i1 in 1:length(used)){
+        ZX[[i1]]=GX
+        for(i2 in 1:d){
+          ZX[[i1]][i2,]=gwas_XIV[[i2]][used[i1],]
+        }
+        ZY[i1,]=gwas_yIV[used[i1],]
+      }
+      
+      for(i1 in 1:d){
+        GX[i1,]=gwas_X[[i1]][i,]
+      }
+      GY[1,]=gwas_y[i,]
+      sigmaG=diag(c(GY$s.d.,GX$s.d.))%*%correlation1%*%diag(c(GY$s.d.,GX$s.d.))
+      sigmaGZY=list()
+      for(i1 in 1:niv){
+        sigmaGZY[[i1]]=matrix(ldi[i1]*c(GY$s.d.,GX$s.d.)*ZY$s.d.[i1]*correlation1[1,],nrow=d+1,ncol=1)
+      }
+      sigmaGZH=list()
+      for(i1 in 1:niv){
+        sigmaGZH[[i1]]=matrix(0,nrow=d+1,ncol=d)
+        for(i2 in 1:d+1){
+          if(i2==1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GY$s.d.*ZX[[i1]]$s.d.*correlation1[1,(2:(d+1))]
+          }
+          if(i2>1){
+            sigmaGZH[[i1]][i2,]=ldi[i1]*GX$s.d.[i2-1]*ZX[[i1]]$s.d.*correlation1[i2,(2:(d+1))]
+          }
+        }
+      }
+      sigmaZ=bdiag(SIG[valid])
+      for(i1 in 1:length(used)){
+        if(i1==1){
+          sigma12=cbind(sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+        if(i1>1){
+          sigma12=cbind(sigma12,sigmaGZY[[i1]],sigmaGZH[[i1]])
+        }
+      }
+      SIGMA1=cbind(sigmaG,sigma12)
+      SIGMA2=cbind(t(sigma12),sigmaZ)
+      SIGMA=rbind(SIGMA1,SIGMA2)
+      U1=bdiag(diag(1,nrow=d+1,ncol=d+1),Omega)%*%SIGMA%*%t(bdiag(diag(1,nrow=d+1,ncol=d+1),Omega))
+      v=c(1,-b,-GX$beta)
+      if(min(eigen(U1)$values)<0){
+        U1=U1+(-min(eigen(U1)$values))*1.001*diag(1,nrow=nrow(U1),ncol=ncol(U1))
+      }
+      out=as.numeric(t(v)%*%U1%*%v)
+    }
+    sdbetaGYadj=sqrt(varbeta3)
+    
+    
+    for(i in 1:nsnpstotal){
+      a=sdbetaGYC[i]^2
+      b1=t(betaGX1[i,])%*%covb%*%betaGX1[i,]
+      c=sum(b^2*as.vector(sdbetaGX1[i,]^2))
+      d=sum(diag(covb)*sdbetaGX1[i,]^2)
+      sdbetaGYadj2[i]=sqrt(a+b1+c+d)
+    }
+    
+    z=abs(betaGYadj/sdbetaGYadj)
+    pvalueadj=(1-pnorm(z))*2
+    z2=abs(betaGYadj/sdbetaGYadj2)
+    pvalueadj2=(1-pnorm(z2))*2
+    resultMVMRcML=data.frame(chr=gene1$V1,rs=gene1$V3,beta=betaGYC,sd=sdbetaGYC,p=pvaluebetaGYC,beta_adj=betaGYadj,sd_adj=sdbetaGYadj,p_adj=pvalueadj,sd_adj2=sdbetaGYadj2,p_adj2=pvalueadj2)
+    
+    
+    library(MendelianRandomization)
+    del=which(rs_IV%in%used==FALSE)
+    d=u
+    DP=200
+    bDP_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_median=matrix(0,nrow=DP,ncol=d)
+    betaGX_IV2=betaGX_IV
+    betaGYC_IV2=betaGYC_IV
+    sdbetaGX_IV2=sdbetaGX_IV
+    sdbetaGYC_IV2=sdbetaGYC_IV
+    SIG2=SIG
+    pvaluebetaGX_IV2=pvaluebetaGX_IV 
+    pvaluebetaGYC_IV2=pvaluebetaGYC_IV
+    if(length(del)>0){
+      betaGX_IV2=as.matrix(betaGX_IV2[-del,])
+      betaGYC_IV2=betaGYC_IV[-del ]
+      sdbetaGX_IV2=as.matrix(sdbetaGX_IV[-del,])
+      sdbetaGYC_IV2=sdbetaGYC_IV[-del ]
+      SIG2=SIG[-del ]
+      pvaluebetaGX_IV2=as.matrix(pvaluebetaGX_IV[-del,]) 
+      pvaluebetaGYC_IV2=pvaluebetaGYC_IV[-del ]
+    }
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV2 ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV2 )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV2 )[i],(betaGX_IV2 )[i,]),Sigma = (SIG2 )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV2 ,by=betaY,byse =sdbetaGYC_IV2 )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_egger[j,]=egger$Estimate
+      bDP_ivw[j,]=ivw$Estimate
+      bDP_lasso[j,]=lasso$Estimate
+      bDP_median[j,]=median1$Estimate
+      
+    }
+    b_egger=colMeans(bDP_egger)
+    covb_egger=cov(bDP_egger)
+    b_ivw=colMeans(bDP_ivw)
+    covb_ivw=cov(bDP_ivw)
+    b_lasso=colMeans(bDP_lasso)
+    covb_lasso=cov(bDP_lasso) 
+    b_median=colMeans(bDP_median)
+    covb_median=cov(bDP_median) 
+    
+    
+    
+    bDP_temp_egger=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_ivw=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_lasso=matrix(0,nrow=DP,ncol=d)
+    bDP_temp_median=matrix(0,nrow=DP,ncol=d)
+    for(j in 1: DP){
+      betaX=matrix(0,nrow=nrow(betaGX_IV ),ncol = d)
+      betaY=numeric()
+      for(i in 1:nrow(betaGX_IV )){
+        
+        beta=mvrnorm(n=1,mu=c((betaGYC_IV )[i],(betaGX_IV )[i,]),Sigma = (SIG )[[i]])
+        betaX[i,]=beta[2:length(beta)]
+        betaY[i]=beta[1]
+      }
+      inp=mr_mvinput(bx=betaX,bxse =sdbetaGX_IV ,by=betaY,byse =sdbetaGYC_IV )
+      egger=mr_mvegger(object = inp) 
+      ivw=mr_mvivw(object = inp)
+      lasso=mr_mvlasso(object = inp,lambda=seq(from=0,to=4,by=0.01))
+      median1=mr_mvmedian(object = inp,iterations=100)
+      bDP_temp_egger[j,]=egger$Estimate
+      bDP_temp_ivw[j,]=ivw$Estimate
+      bDP_temp_lasso[j,]=lasso$Estimate
+      bDP_temp_median[j,]=median1$Estimate
+      
+    }
+    b_temp_egger=colMeans(bDP_temp_egger)
+    covb_temp_egger=cov(bDP_temp_egger)
+    b_temp_ivw=colMeans(bDP_temp_ivw)
+    covb_temp_ivw=cov(bDP_temp_ivw)
+    b_temp_lasso=colMeans(bDP_temp_lasso)
+    covb_temp_lasso=cov(bDP_temp_lasso) 
+    b_temp_median=colMeans(bDP_temp_median)
+    covb_temp_median=cov(bDP_temp_median) 
+    
+    
+    
+    betaGYadj_egger=numeric()
+    betaGYadj_lasso=numeric()
+    betaGYadj_median=numeric()
+    betaGYadj_ivw=numeric()
+    varbetaGYadj_egger1=numeric()
+    varbetaGYadj_lasso1=numeric()
+    varbetaGYadj_median1=numeric()
+    varbetaGYadj_ivw1=numeric()
+    varbetaGYadj_egger2=numeric()
+    varbetaGYadj_lasso2=numeric()
+    varbetaGYadj_median2=numeric()
+    varbetaGYadj_ivw2=numeric()
+    
+    
+    for(j1 in 1:Nsnps){
+      betaGYadj_egger[j1]=betaGYC[j1]-b_egger%*%betaGX1[j1,]
+      betaGYadj_median[j1]=betaGYC[j1]-b_median%*%betaGX1[j1,]
+      betaGYadj_lasso[j1]=betaGYC[j1]-b_lasso%*%betaGX1[j1,]
+      betaGYadj_ivw[j1]=betaGYC[j1]-b_ivw%*%betaGX1[j1,]
+      covbetax=diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)%*%correlation1[2:(1+d),2:(1+d)]%*%diag(x=c(sdbetaGX1[j1,]),nrow=d,ncol=d)
+      covbetayx=sdbetaGYC[j1]*sdbetaGX1[j1,]*correlation1[1,2:(d+1)]
+      varbetaGYadj_egger1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_egger))+sum(b_egger^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]
+      varbetaGYadj_ivw1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_ivw))+sum(b_ivw^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]
+      varbetaGYadj_lasso1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_lasso))+sum(b_lasso^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]
+      varbetaGYadj_median1[j1]=sdbetaGYC[j1]^2+sum(diag(covbetax*covb_median))+sum(b_median^2*diag(covbetax))+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]
+      varbetaGYadj_egger2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_egger)+t(b_egger)%*%covbetax%*%b_egger+t(betaGX1[j1,])%*%covb_egger%*%betaGX1[j1,]-2*sum(b_egger*covbetayx)
+      varbetaGYadj_ivw2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_ivw)+t(b_ivw)%*%covbetax%*%b_ivw+t(betaGX1[j1,])%*%covb_ivw%*%betaGX1[j1,]-2*sum(b_ivw*covbetayx)
+      varbetaGYadj_lasso2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_lasso)+t(b_lasso)%*%covbetax%*%b_lasso+t(betaGX1[j1,])%*%covb_lasso%*%betaGX1[j1,]-2*sum(b_lasso*covbetayx)
+      varbetaGYadj_median2[j1]=sdbetaGYC[j1]^2+sum(covbetax*covb_median)+t(b_median)%*%covbetax%*%b_median+t(betaGX1[j1,])%*%covb_median%*%betaGX1[j1,]-2*sum(b_median*covbetayx)
     }
     
     SDbetaGYadj_egger1=sqrt(varbetaGYadj_egger1) 
