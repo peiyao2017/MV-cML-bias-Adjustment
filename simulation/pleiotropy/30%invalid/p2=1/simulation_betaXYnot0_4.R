@@ -48,7 +48,7 @@ for(t in 1:length(rhos)){
        rm(Geno)
 
       
-      LD=cor(Gmatrix)
+      LD=cor(Gmatrix[1:1000,1:1000])
       for(i in 1:ncol(Gmatrix)){
         Gmatrix[,i]=scale(Gmatrix[,i],center = TRUE,scale=FALSE)
       }
@@ -534,7 +534,7 @@ for(t in 1:length(rhos)){
       sdbetaGYadj1=numeric()
       sdbetaGYadj2=numeric()
       varbeta=numeric()
-      for(i in 1:Nsnps){
+      for(i in 1:1000){
         rs=0
         beta=0
         s.d.=0
