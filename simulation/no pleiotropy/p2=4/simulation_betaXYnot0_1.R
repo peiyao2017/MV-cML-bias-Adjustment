@@ -163,22 +163,22 @@ for(t in 1:length(rhos)){
             correlation1[i,j]=1
           }
           if(i==1&j>1){
-            x1=y_sim[,i]
-            x2=X_sim[,j-1]
+            x1=(gwas_y$`t-stat`)[gwas_y$p>0.1&gwas_X[[j-1]]$p>0.1]
+            x2=(gwas_X[[j-1]]$`t-stat`)[gwas_y$p>0.1&gwas_X[[j-1]]$p>0.1]
             correlation1[i,j]=cor(x1,x2)
           }
           if(i>1&j==1){
-            x1=y_sim[,j]
-            x2=X_sim[,i-1]
+            x1=(gwas_y$`t-stat`)[gwas_y$p>0.1&gwas_X[[i-1]]$p>0.1]
+            x2=(gwas_X[[i-1]]$`t-stat`)[gwas_y$p>0.1&gwas_X[[i-1]]$p>0.1]
             correlation1[i,j]=cor(x1,x2)
           }
           if(i>1&j>1){
-            x1=X_sim[,i-1]
-            x2=X_sim[,j-1]
+            x1=(gwas_X[[i-1]]$`t-stat`)[gwas_X[[i-1]]$p>0.1&gwas_X[[j-1]]$p>0.1]
+            x2=(gwas_X[[j-1]]$`t-stat`)[gwas_X[[i-1]]$p>0.1&gwas_X[[j-1]]$p>0.1]
             correlation1[i,j]=cor(x1,x2)
           }
         }
-      }
+      } 
 
 
 
