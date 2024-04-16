@@ -11,7 +11,7 @@ library(mvtnorm)
 library(MASS)
 d=2
 nIV=30
-rhos=c(-0.5)
+rhos=c( 0 )
 name_effects=numeric()
 Nsnps=1000
 N=20000
