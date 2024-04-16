@@ -25,30 +25,31 @@ for(t in 1:length(rhos)){
 }
 
 for(t in 1:length(rhos)){
+   
   load(name_effects[t])
-  betaGY=effect[[1]]
-  betaGX=effect[[2]]
-  MAF=effect[[3]]
+ 
+  betaGY=c(effect[[1]],rep(0,3000))
+  betaGX=cbind(effect[[2]],matrix(0,nrow=d,ncol = 3000))
+ 
   betaXY=effect[[4]]
   SNP_effect=betaGY
-  valid_percent=0.5
+  valid_percent=0.7
   nIV=30
-   
-  
   for(t1 in 1:20){
     
     output=foreach(jt=1:50,.combine = "rbind")%dopar%{
       library(mvtnorm)
       library(MASS)
       library(BEDMatrix)
+     
        load("Geno50.RDATA")
       Gmatrix=Geno[[1]][sample(c(1:nrow(Geno[[1]])),size=Nsample,replace = FALSE),]
       simID=Geno[[2]]
       simIV=Geno[[3]]
-      rm(Geno)
+       rm(Geno)
 
       
-      LD=cor(Gmatrix)
+      LD=cor(Gmatrix[1:1000,1:1000])
       for(i in 1:ncol(Gmatrix)){
         Gmatrix[,i]=scale(Gmatrix[,i],center = TRUE,scale=FALSE)
       }
@@ -157,18 +158,18 @@ for(t in 1:length(rhos)){
             correlation1[i,j]=1
           }
           if(i==1&j>1){
-            x1=y_sim[,i]
-            x2=X_sim[,j-1]
+            x1=(gwas_y$`t-stat`[1001:4000])[gwas_y$p[1001:4000]>0.1&gwas_X[[j-1]]$p[1001:4000]>0.1]
+            x2=(gwas_X[[j-1]]$`t-stat`[1001:4000])[gwas_y$p[1001:4000]>0.1&gwas_X[[j-1]]$p[1001:4000]>0.1]
             correlation1[i,j]=cor(x1,x2)
           }
           if(i>1&j==1){
-            x1=y_sim[,j]
-            x2=X_sim[,i-1]
+            x1=(gwas_y$`t-stat`[1001:4000])[gwas_y$p[1001:4000]>0.1&gwas_X[[i-1]]$p[1001:4000]>0.1]
+            x2=(gwas_X[[i-1]]$`t-stat`[1001:4000])[gwas_y$p[1001:4000]>0.1&gwas_X[[i-1]]$p[1001:4000]>0.1]
             correlation1[i,j]=cor(x1,x2)
           }
           if(i>1&j>1){
-            x1=X_sim[,i-1]
-            x2=X_sim[,j-1]
+            x1=(gwas_X[[i-1]]$`t-stat`[1001:4000])[gwas_X[[i-1]]$p[1001:4000]>0.1&gwas_X[[j-1]]$p[1001:4000]>0.1]
+            x2=(gwas_X[[j-1]]$`t-stat`[1001:4000])[gwas_X[[i-1]]$p[1001:4000]>0.1&gwas_X[[j-1]]$p[1001:4000]>0.1]
             correlation1[i,j]=cor(x1,x2)
           }
         }
@@ -534,7 +535,7 @@ for(t in 1:length(rhos)){
       sdbetaGYadj1=numeric()
       sdbetaGYadj2=numeric()
       varbeta=numeric()
-      for(i in 1:Nsnps){
+      for(i in 1:1000){
         rs=0
         beta=0
         s.d.=0
@@ -633,18 +634,15 @@ for(t in 1:length(rhos)){
       
       
       
-      bias=numeric()
-      bias_true=numeric()
-      varG_true=2*MAF*(1-MAF)
       M22total=list()
-      covG=cov(Gmatrix)
-      for(i in 1:Nsnps){
+      covG=cov(Gmatrix[1:1000,1:1000])
+      for(i in 1:1000){
         covGtemp=covG[-i,-i]
-        betaGXtemp=betaGX[,-i]
+        betaGXtemp=matrix(betaGX[,1:1000],nrow=1,ncol=1000)[,-i]
         M22total[[i]]=betaUX%*%t(betaUX)*var(U)+varEX+t(betaGXtemp)%*%covGtemp%*%betaGXtemp
         print(i)
       }
-      b_true=matrix(0,nrow = Nsnps,ncol = d)
+      b_true=matrix(0,nrow = 1000,ncol = d)
       for(i in 1:Nsnps){
         b_true[i,]=-betaUY[1,1]*solve(M22total[[i]])%*%betaUX*var(U)
       }
@@ -697,10 +695,22 @@ for(t in 1:length(rhos)){
       slope_se=as.data.frame(slope_se)
       colnames(slope_se)=c(name1se,name2se,name3se,name4se,name5se,name6se,name7se,name8se)
       
-      IV_vector=rep(used,times=1000)
-      IV_usd=IV_vector[1:1000]
+       
       
-      result1=data.frame(rs=gwas_y$rs,beta_before=gwas_y$beta,se_before=gwas_y$s.d.,p_before=gwas_y$p,beta_after=betaGYadj,se_after1=sdbetaGYadj1,se_after2=sdbetaGYadj2,se_after3=sdbetaGYadj3,p_after1=pvalueadj1,p_after2=pvalueadj2,p_after3=pvalueadj3,beta_DD=betaGYadj_DD,se_DD1=SDbetaGYadj_DD1,se_DD2=SDbetaGYadj_DD2,p_DD1=pvalueadj_DD1,p_DD2=pvalueadj_DD2,beta_egger=betaGYadj_egger,se_egger1=SDbetaGYadj_egger1,se_egger2=SDbetaGYadj_egger2,p_egger1=pvalueadj_egger1,p_egger2=pvalueadj_egger2,beta_SH=betaGYadj_SH,se_SH1=SDbetaGYadj_SH1,se_SH2=SDbetaGYadj_SH2,p_SH1=pvalueadj_SH1,p_SH2=pvalueadj_SH2,beta_median=betaGYadj_median,se_median1=SDbetaGYadj_median1,se_median2=SDbetaGYadj_median2,p_median1=pvalueadj_median1,p_median2=pvalueadj_median2,beta_ivw=betaGYadj_ivw,se_ivw1=SDbetaGYadj_ivw1,se_ivw2=SDbetaGYadj_ivw2,p_ivw1=pvalueadj_ivw1,p_ivw2=pvalueadj_ivw2,beta_lasso=betaGYadj_lasso,se_lasso1=SDbetaGYadj_lasso1,se_lasso2=SDbetaGYadj_lasso2,p_lasso1=pvalueadj_lasso1,p_lasso2=pvalueadj_lasso2,beta_true=SNP_effect,IV=IV_usd)
+      result1=data.frame(rs=gwas_y$rs[1:1000],beta_before=gwas_y$beta[1:1000],se_before=gwas_y$s.d.[1:1000],
+                         p_before=gwas_y$p[1:1000],beta_after=betaGYadj[1:1000],se_after1=sdbetaGYadj1[1:1000],
+                         se_after2=sdbetaGYadj2[1:1000],se_after3=sdbetaGYadj3[1:1000],p_after1=pvalueadj1[1:1000],
+                         p_after2=pvalueadj2[1:1000],p_after3=pvalueadj3[1:1000],beta_DD=betaGYadj_DD[1:1000],
+                         se_DD1=SDbetaGYadj_DD1[1:1000],se_DD2=SDbetaGYadj_DD2[1:1000],p_DD1=pvalueadj_DD1[1:1000],
+                         p_DD2=pvalueadj_DD2[1:1000],beta_egger=betaGYadj_egger[1:1000],se_egger1=SDbetaGYadj_egger1[1:1000],
+                         se_egger2=SDbetaGYadj_egger2[1:1000],p_egger1=pvalueadj_egger1[1:1000],p_egger2=pvalueadj_egger2[1:1000],
+                         beta_SH=betaGYadj_SH[1:1000],se_SH1=SDbetaGYadj_SH1[1:1000],se_SH2=SDbetaGYadj_SH2[1:1000],
+                         p_SH1=pvalueadj_SH1[1:1000],p_SH2=pvalueadj_SH2[1:1000],beta_median=betaGYadj_median[1:1000],
+                         se_median1=SDbetaGYadj_median1[1:1000],se_median2=SDbetaGYadj_median2[1:1000],p_median1=pvalueadj_median1[1:1000],
+                         p_median2=pvalueadj_median2[1:1000],beta_ivw=betaGYadj_ivw[1:1000],se_ivw1=SDbetaGYadj_ivw1[1:1000],
+                         se_ivw2=SDbetaGYadj_ivw2[1:1000],p_ivw1=pvalueadj_ivw1[1:1000],p_ivw2=pvalueadj_ivw2[1:1000],beta_lasso=betaGYadj_lasso[1:1000],
+                         se_lasso1=SDbetaGYadj_lasso1[1:1000],se_lasso2=SDbetaGYadj_lasso2[1:1000],p_lasso1=pvalueadj_lasso1[1:1000],
+                         p_lasso2=pvalueadj_lasso2[1:1000],beta_true=SNP_effect[1:1000])
       result=cbind(result1,slope,slope_se) 
     }
     write.table(output,file=outnames[t,t1],sep="\t",row.names=FALSE,quote = FALSE)  
